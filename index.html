@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Reservation System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Lab Reservation System</h1>
+        <nav id="nav">
+            <button id="loginBtn">Login</button>
+            <button id="registerBtn">Register</button>
+            <button id="logoutBtn" style="display:none;">Logout</button>
+        </nav>
+    </header>
+    <main>
+        <div id="loginForm" style="display:none;">
+            <h2>Login</h2>
+            <input type="email" id="loginEmail" placeholder="Email">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button id="submitLogin">Login</button>
+        </div>
+        <div id="registerForm" style="display:none;">
+            <h2>Register</h2>
+            <input type="email" id="regEmail" placeholder="Institutional Email">
+            <input type="text" id="regName" placeholder="Name">
+            <input type="password" id="regPassword" placeholder="Password">
+            <select id="regRole">
+                <option value="student">Student</option>
+                <option value="technician">Lab Technician</option>
+            </select>
+            <button id="submitRegister">Register</button>
+        </div>
+        <div id="dashboard">
+            <h2>Dashboard</h2>
+            <div id="availability">
+                <select id="labSelect">
+                    <option value="lab1">Lab 1</option>
+                    <option value="lab2">Lab 2</option>
+                    <option value="lab3">Lab 3</option>
+                </select>
+                <input type="date" id="dateSelect">
+                <button id="viewAvailability">View Availability</button>
+                <div id="slots"></div>
+            </div>
+            <div id="reservations">
+                <h3>Your Reservations</h3>
+                <ul id="reservationList"></ul>
+            </div>
+            <div id="search">
+                <h3>Search Free Slots</h3>
+                <input type="date" id="searchDate">
+                <input type="time" id="searchTime">
+                <select id="searchLab">
+                    <option value="lab1">Lab 1</option>
+                    <option value="lab2">Lab 2</option>
+                    <option value="lab3">Lab 3</option>
+                </select>
+                <button id="searchBtn">Search</button>
+                <div id="searchResults"></div>
+            </div>
+        </div>
+        <div id="profile" style="display:none;">
+            <h2>Profile</h2>
+            <input type="text" id="profileDesc" placeholder="Description">
+            <input type="file" id="profilePic" accept="image/*">
+            <button id="saveProfile">Save</button>
+            <div id="profileView"></div>
+        </div>
+        <div id="users" style="display:none;">
+            <h2>All Users</h2>
+            <ul id="usersList"></ul>
+        </div>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
