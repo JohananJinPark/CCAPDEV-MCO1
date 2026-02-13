@@ -196,14 +196,21 @@ function loadReservationsList() {
 }
 
 function editReservation(res) {
-    // Simple edit: remove and re-add
+showView('dashboard');
+
+    document.getElementById('labSelect').value = res.lab;
+    document.getElementById('dateSelect').value = res.date;
+    document.getElementById('viewAvailability').click();
+
     removeReservation(res.id);
+    alert(`Editing reservation for ${res.lab}. Please select a new slot or re-confirm your current one.`);
 }
 
 function removeReservation(id) {
     const reservations = loadReservations();
     saveReservations(reservations.filter(r => r.id !== id));
     loadReservationsList();
+    showView('dashboard');
 }
 
 // Search
