@@ -8,13 +8,20 @@
 </head>
 <body>
     <header>
-        <h1>Lab Reservation System</h1>
+        <section id="title">
+            <h2>AnimoLabs</h2>
+            <p>Laboratory Reservation System</p>
+        </section>
         <nav id="nav">
             <button id="loginBtn">Login</button>
             <button id="registerBtn">Register</button>
             <button id="logoutBtn" style="display:none;">Logout</button>
         </nav>
     </header>
+        <div class="heading">
+            <h1>Effortless Laboratory Reservations Start Here.</h1>
+            <p>With AnimoLabs, you can navigate and easily reserve available time slots for DLSU Laboratories.</p>
+        </div>
     <main>
         <div id="loginForm" style="display:none;">
             <h2>Login</h2>
@@ -46,11 +53,11 @@
                 <div id="slots"></div>
             </div>
             <div id="reservations">
-                <h3>Your Reservations</h3>
+                <h2>Your Reservations</h2>
                 <ul id="reservationList"></ul>
             </div>
             <div id="search">
-                <h3>Search Free Slots</h3>
+                <h2>Search Free Slots</h2>
                 <input type="date" id="searchDate">
                 <input type="time" id="searchTime">
                 <select id="searchLab">
