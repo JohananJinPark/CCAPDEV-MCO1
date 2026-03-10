@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimoLabs | DLSU Lab Reservation System</title>
+    <link rel="stylesheet" href="landing.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <h2>AnimoLabs <span id="headerSubtitle">| DLSU</span></h2>
+        <nav id="landingNav">
+            <a href="login.html"><button href="login.html" id="loginBtn">Login</button></a>
+            <a href="register.html"><button id="regBtn">Register</button></a>
+        </nav>
+    </header>
+    <main>
+        <div class="landingSection">
+            <div class="landingSectionTop">De La Salle University - Computer Lab Management System</div>
+            <section id="landingTitle">
+                <h1>Reserve Computer Lab Seats<br>
+                    <span id="landingTitleSpan">Easily and Efficiently.</span>
+                </h1>
+            </section>
+            <section>
+                <p>AnimoLabs makes it easier to book computer lab seats at DLSU.
+                    Check available slots, reserve your spot, and manage all of
+                    your sessions all in one place!</p>
+            </section>
+            <section id="landingBtns">
+                <a href="register.html"><button id="getStartedBtn">Get Started &#8594</button></a>
+                <a href=#labs-section><button id="viewLabsBtn">View Labs &#8594</button></a>
+            </section>
+            <section>
+                <div class="gridContainer">
+                    <div class="itemTop">3</div>
+                    <div class="itemTop">105</div>
+                    <div class="itemTop">7AM-9PM</div>
+                    <div class="itemBot">Computer Labs</div>
+                    <div class="itemBot">Total Seats</div>
+                    <div class="itemBot">Daily Hours</div>
+                </div>
+            </section>
+        </div>
+
+        <!-- LABS SECTION -->
+        <section id="labs-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Available Computer Labs</h2>
+                    <p>Choose from fully-equipped computer labs across campus.</p>
+                </div>
+
+                <div class="labs-grid">
+
+                    <a href="login.html" class="lab-link">
+                        <div class="lab-card">
+                            <div class="lab-content">
+                                <div class="lab-top">
+                                    <div class="lab-icon">💻</div>
+                                    <span class="available">20 available</span>
+                                </div>
+
+                                <h3>Gokongwei Lab 1</h3>
+                                <p class="location">Gokongwei Hall</p>
+
+                                <div class="availability">
+                                    <div class="availability-text">
+                                        <span>20 / 40 seats available</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress" style="width:50%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="lab-footer">
+                                <span>40 total seats</span>
+                                <span>→</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="login.html" class="lab-link">
+                        <div class="lab-card">
+                            <div class="lab-content">
+                                <div class="lab-top">
+                                    <div class="lab-icon">💻</div>
+                                    <span class="available">10 available</span>
+                                </div>
+
+                                <h3>Andrew Lab 2</h3>
+                                <p class="location">Andrew Building</p>
+
+                                <div class="availability">
+                                    <div class="availability-text">
+                                        <span>10 / 30 seats available</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress warning" style="width:33%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="lab-footer">
+                                <span>30 total seats</span>
+                                <span>→</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="login.html" class="lab-link">
+                        <div class="lab-card">
+                            <div class="lab-content">
+                                <div class="lab-top">
+                                    <div class="lab-icon">💻</div>
+                                    <span class="available">5 available</span>
+                                </div>
+
+                                <h3>Velasco Lab 3</h3>
+                                <p class="location">Velasco Hall</p>
+
+                                <div class="availability">
+                                    <div class="availability-text">
+                                        <span>5 / 25 seats available</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress danger" style="width:20%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="lab-footer">
+                                <span>25 total seats</span>
+                                <span>→</span>
+                            </div>
+                        </div>
+                    </a>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- FEATURES -->
+        <section class="features-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Everything You Need</h2>
+                    <p>A complete lab management solution built for DLSU students and staff.</p>
+                </div>
+
+                <div class="features-grid">
+
+                    <div class="feature-card">
+                        <h3>Easy Reservations</h3>
+                        <p>Quickly reserve computer lab seats with an intuitive booking system.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>Real-time Availability</h3>
+                        <p>Check live seat availability across all computer laboratories.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>Reservation Management</h3>
+                        <p>Be updated with upcoming reservations and manage them in one place.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- CTA -->
+        <section class="cta-section">
+            <div class="cta-container">
+                <h2>Ready to Reserve Your Seat?</h2>
+                <p>Join hundreds of DLSU students already using AnimoLabs.</p>
+
+                <div class="cta-buttons">
+                    <a href="register.html"><button class="primary-btn">Register</button></a>
+                    <a href="login.html"><button class="secondary-btn">Login</button></a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="app.js"></script>
+</body>
+
+<footer>
+    <div class="footer-bottom">
+        © 2026 De La Salle University – AnimoLabs
+    </div>
+</footer>
+
+</html>

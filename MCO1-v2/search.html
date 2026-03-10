@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Available Slots</title>
+    <link rel="stylesheet" href="search.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <h1>Search Available Slots</h1>
+            <p>Find open seats across all labs based on your preferences</p>
+        </div>
+
+
+        <!-- SEARCH FILTER PANEL -->
+
+        <div class="card">
+
+            <h2>Search Filters</h2>
+
+            <div class="filters">
+
+                <!-- LAB -->
+
+                <div class="field">
+                    <label>Laboratory</label>
+                    <select>
+                        <option>All Labs</option>
+                        <option>Gokongwei</option>
+                        <option>Andrew</option>
+                        <option>SJ</option>
+                    </select>
+                </div>
+
+                <!-- DATE -->
+
+                <div class="field">
+                    <label>Date</label>
+                    <select>
+                        <option>Any date (next 7 days)</option>
+                        <option>Mon, Feb 23</option>
+                        <option>Tue, Feb 24</option>
+                        <option>Wed, Feb 25</option>
+                    </select>
+                </div>
+
+                <!-- TIME FROM -->
+
+                <div class="field">
+                    <label>From Time</label>
+                    <select>
+                        <option>Any time</option>
+                        <option>8:00</option>
+                        <option>8:30</option>
+                        <option>9:00</option>
+                        <option>9:30</option>
+                    </select>
+                </div>
+
+                <!-- TIME TO -->
+
+                <div class="field">
+                    <label>Until Time</label>
+                    <select>
+                        <option>Any time</option>
+                        <option>10:00</option>
+                        <option>10:30</option>
+                        <option>11:00</option>
+                        <option>11:30</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button class="search-btn">Search Available Slots</button>
+
+        </div>
+
+
+        <!-- RESULTS HEADER -->
+
+        <div class="results-header">
+            <h2>Search Results</h2>
+            <p>Found <b>12</b> available seats</p>
+        </div>
+
+
+        <!-- DATE GROUP -->
+
+        <div class="date-group">
+
+            <div class="date-label">Monday, Feb 23</div>
+
+
+            <!-- LAB GROUP -->
+
+            <div class="lab-card">
+
+                <div class="lab-header">
+                    <div>
+                        <b>Gokongwei Lab</b>
+                        <span>– Building A</span>
+                    </div>
+
+                    <div class="available">4 seats available</div>
+                </div>
+
+
+                <div class="seats">
+
+                    <!-- SEAT RESULT -->
+
+                    <div class="seat-result">
+
+                        <div class="seat-num">12</div>
+
+                        <div class="seat-info">
+                            <p>Seat 12</p>
+                            <span>5 slots free (10:00+)</span>
+                        </div>
+
+                        <button class="reserve">Reserve →</button>
+
+                    </div>
+
+
+                    <div class="seat-result">
+
+                        <div class="seat-num">5</div>
+
+                        <div class="seat-info">
+                            <p>Seat 5</p>
+                            <span>3 slots free (11:00+)</span>
+                        </div>
+
+                        <button class="reserve">Reserve →</button>
+
+                    </div>
+
+
+                    <div class="seat-result">
+
+                        <div class="seat-num">9</div>
+
+                        <div class="seat-info">
+                            <p>Seat 9</p>
+                            <span>6 slots free (9:30+)</span>
+                        </div>
+
+                        <button class="reserve">Reserve →</button>
+
+                    </div>
+
+
+                    <div class="seat-result">
+
+                        <div class="seat-num">15</div>
+
+                        <div class="seat-info">
+                            <p>Seat 15</p>
+                            <span>4 slots free (1:00+)</span>
+                        </div>
+
+                        <button class="reserve">Reserve →</button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- EMPTY STATE (OPTIONAL) -->
+
+            <!--
+<div class="empty">
+<h3>No available slots found</h3>
+<p>Try adjusting your filters or choosing another date.</p>
+</div>
+-->
+
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

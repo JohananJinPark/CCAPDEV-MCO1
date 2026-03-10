@@ -1,0 +1,175 @@
+*{
+    box-sizing:border-box;
+    font-family:"Inter", sans-serif;
+    margin:0;
+    padding:0;
+}
+
+body{
+    background:#f7f9f8;
+    padding:40px;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+}
+
+/* HEADER */
+
+.page-header h1{
+    font-size:26px;
+    font-weight:700;
+    color:#111;
+}
+
+.page-header p{
+    color:#666;
+    font-size:14px;
+    margin-top:4px;
+    margin-bottom:20px;
+}
+
+/* SUMMARY */
+
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-bottom:20px;
+}
+
+.summary-card{
+    background:white;
+    padding:20px;
+    border-radius:14px;
+    border:1px solid #eee;
+}
+
+.summary-card h2{
+    font-size:26px;
+}
+
+.summary-card p{
+    color:#666;
+    font-size:14px;
+}
+
+/* FILTERS */
+
+.filters{
+    display:flex;
+    gap:10px;
+    margin-bottom:10px;
+}
+
+.filters input,
+.filters select{
+    padding:9px 12px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    font-size:14px;
+}
+
+.filters input{
+    flex:1;
+}
+
+.results{
+    font-size:12px;
+    color:#777;
+    margin-bottom:15px;
+}
+
+/* TABLE CARD */
+
+.table-card{
+    background:white;
+    border-radius:16px;
+    border:1px solid #eee;
+    overflow:hidden;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead{
+    background:#f6f7f7;
+}
+
+th{
+    text-align:left;
+    font-size:12px;
+    color:#777;
+    padding:14px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+}
+
+td{
+    padding:14px;
+    font-size:14px;
+    border-top:1px solid #f0f0f0;
+}
+
+.alt{
+    background:#fafafa;
+}
+
+/* SEAT BOX */
+
+.seat{
+    width:32px;
+    height:32px;
+    background:#006B3F;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+/* STUDENT */
+
+.student .name{
+    font-weight:600;
+}
+
+.student .email{
+    font-size:12px;
+    color:#888;
+}
+
+/* TIME */
+
+.time{
+    font-size:12px;
+    color:#888;
+}
+
+/* STATUS */
+
+.status{
+    font-size:12px;
+    font-weight:600;
+}
+
+.confirmed{
+    color:#16a34a;
+}
+
+.pending{
+    color:#d97706;
+}
+
+.cancelled{
+    color:#ef4444;
+}
+
+.booked{
+    font-size:12px;
+    color:#888;
+}

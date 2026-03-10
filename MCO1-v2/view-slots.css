@@ -1,0 +1,208 @@
+body {
+    font-family: "Inter", sans-serif;
+    background: #f5f7f6;
+    margin: 0;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 30px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.header h1 {
+    margin: 0;
+}
+
+.header p {
+    color: gray;
+    font-size: 14px;
+}
+
+.refresh {
+    border: 1px solid #ddd;
+    background: white;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+.filter label {
+    font-size: 14px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+}
+
+select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.dates {
+    display: flex;
+    gap: 8px;
+}
+
+.date {
+    border: 1px solid #ddd;
+    background: white;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.date.active {
+    background: #006B3F;
+    color: white;
+}
+
+.lab-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.lab-icon {
+    font-size: 20px;
+    background: #e8f5ee;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.updated {
+    margin-left: auto;
+    font-size: 12px;
+    color: gray;
+}
+
+.legend {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.box {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+}
+
+.available {
+    background: #dcfce7;
+}
+
+.reserved {
+    background: #fee2e2;
+}
+
+.blocked {
+    background: #e5e7eb;
+}
+
+.mine {
+    background: #dbeafe;
+}
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+.seat-map {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+.instructor {
+    text-align: center;
+    background: #e5e7eb;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 12px;
+}
+
+.seats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.seat {
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.seat.available {
+    background: #dcfce7;
+}
+
+.seat.reserved {
+    background: #fee2e2;
+}
+
+.seat.blocked {
+    background: #e5e7eb;
+}
+
+.seat.mine {
+    background: #dbeafe;
+}
+
+.seat:hover {
+    transform: scale(1.05);
+}
+
+.seat-panel {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+.summary {
+    margin-top: 20px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
