@@ -1,0 +1,196 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", sans-serif;
+}
+
+body {
+    background: #f0f9f4;
+}
+
+.register-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+}
+
+.register-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+/* HEADER */
+
+.register-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #555;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: #006B3F;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #006B3F;
+}
+
+.register-header h2 {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.register-header p {
+    color: #777;
+    font-size: 14px;
+}
+
+/* CARD */
+
+.register-card {
+    background: white;
+    padding: 35px;
+    border-radius: 18px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+/* FORM */
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #444;
+}
+
+input {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #006B3F;
+    box-shadow: 0 0 0 3px rgba(0, 107, 63, 0.15);
+}
+
+small {
+    color: #999;
+    font-size: 12px;
+}
+
+/* PASSWORD BAR */
+
+.strength-bar {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.strength-bar div {
+    flex: 1;
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 5px;
+}
+
+.strength-text {
+    font-size: 12px;
+    color: #888;
+    margin-top: 3px;
+}
+
+/* ROLE */
+
+.role-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.role-btn {
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.role-btn.active {
+    border-color: #006B3F;
+    background: #e8f5ee;
+    color: #006B3F;
+}
+
+.role-desc {
+    font-size: 12px;
+    color: #777;
+    margin-top: 5px;
+}
+
+/* SUBMIT */
+
+.submit-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #006B3F;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    opacity: 0.9;
+}
+
+/* SIGN IN */
+
+.signin {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 14px;
+    color: #555;
+}
+
+.signin a {
+    color: #006B3F;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* NOTE */
+
+.note {
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+    margin-top: 12px;
+}
