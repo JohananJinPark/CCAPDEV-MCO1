@@ -42,3 +42,37 @@ app.get('/api/reservations', async (req, res) => {
     const reservations = await Reservation.find().populate('userId', 'name email');
     res.json(reservations);
 });
+
+// Landing Page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'ANIMOLABS.html'));
+});
+
+// Login Route
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'login.html'));
+});
+
+// Registration Route
+app.get('/register', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'register.html'));
+});
+
+// Dashboards
+app.get('/student-dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'student-dashboard.html'));
+});
+
+app.get('/tech-dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'tech-dashboard.html'));
+});
+
+// View Slots
+app.get('/view-slots', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'view-slots.html'));
+});
+
+// My Reservations
+app.get('/my-reservations', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'my-reservations.html'));
+});
