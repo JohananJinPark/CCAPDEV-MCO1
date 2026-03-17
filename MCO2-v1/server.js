@@ -8,7 +8,8 @@ const app = express();
 
 // Middleware to handle JSON data and static files
 app.use(express.json());
-app.use(express.static('public')); 
+app.use(express.static('public'));
+app.use(express.static('assets'));
 console.log('Connecting to DB at:', process.env.MONGODB_URI);
 // Connect to MongoDB (ensure your .env has MONGODB_URI)
 mongoose.connect(process.env.MONGODB_URI)

@@ -75,7 +75,7 @@ a {
     padding-left: 100px;
     background-image:
         linear-gradient(rgba(0, 107, 63, 0.85), rgba(0, 107, 63, 0.85)),
-        url("../assets/landing.jpg");
+        url("/assets/landing.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

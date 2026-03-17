@@ -9,7 +9,7 @@ const Reservation = require('./models/Reservation');
 const seedUsers = [
     {
         name: 'Juan Dela Cruz',
-        email: 'juan.delacruz@dlsu.edu',
+        email: 'juan.delacruz@dlsu.edu.ph',
         password: 'password123',
         role: 'student',
         bio: 'CS student who loves coding.',
@@ -17,7 +17,7 @@ const seedUsers = [
     },
     {
         name: 'Carlos Reyes',
-        email: 'carlos.reyes@dlsu.edu',
+        email: 'carlos.reyes@dlsu.edu.ph',
         password: 'password123',
         role: 'technician',
         bio: 'Lab technician at DLSU.',
@@ -25,7 +25,7 @@ const seedUsers = [
     },
     {
         name: 'Maria Santos',
-        email: 'maria.santos@dlsu.edu',
+        email: 'maria.santos@dlsu.edu.ph',
         password: 'password123',
         role: 'student',
         bio: 'Biology student.',
