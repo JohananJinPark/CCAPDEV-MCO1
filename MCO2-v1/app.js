@@ -393,7 +393,7 @@ const LandingPage = {
             const regBtn = document.getElementById('regBtn');
             if (loginBtn) loginBtn.textContent = 'Dashboard';
             if (loginBtn) loginBtn.closest('a') && (loginBtn.closest('a').href = user.role === 'technician' ? 'tech-dashboard.html' : 'student-dashboard.html');
-            if (regBtn) { regBtn.textContent = 'Logout'; regBtn.onclick = (e) => { e.preventDefault(); Auth.logout(); }; }
+            if (regBtn) { regBtn.textContent = 'Logout'; regBtn.onclick = (e) => { /*e.preventDefault*/(); Auth.logout(); }; }
         }
         this.updateLabCards();
     },
@@ -491,7 +491,7 @@ const RegisterPage = {
         const submitBtn = form.querySelector('.submit-btn');
         if (submitBtn) {
             submitBtn.onclick = (e) => {
-                e.preventDefault();
+                //e.preventDefault();
                 const inputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
                 const name = inputs[0]?.value.trim();
                 const email = inputs[1]?.value.trim();
@@ -536,45 +536,45 @@ const RegisterPage = {
     },
 };
 
-/* LOGIN */
-const LoginPage = {
-    init() {
-        const form = document.querySelector('form');
-        if (!form) return;
-
-        // demo buttons
-        document.querySelectorAll('.demo-buttons button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const emailInput = form.querySelector('input[type="email"]');
-                const pwInput = form.querySelector('input[type="password"]');
-                if (emailInput) emailInput.value = btn.textContent.trim().replace(/^(Student|Technician): /, '');
-                if (pwInput) pwInput.value = 'password123';
-            });
-        });
-
-        const loginBtn = form.querySelector('.login-btn');
-        if (loginBtn) {
-            loginBtn.onclick = (e) => {
-                e.preventDefault();
-                const email = form.querySelector('input[type="email"]')?.value.trim();
-                const password = form.querySelector('input[type="password"]')?.value;
-                const remember = form.querySelector('input[type="checkbox"]')?.checked;
-
-                if (!email || !password) return Utils.toast('Please enter email and password.', 'error');
-
-                const users = Store.getUsers();
-                const user = users.find(u => u.email === email && u.password === password);
-                if (!user) return Utils.toast('Invalid email or password.', 'error');
-
-                Store.setSession(user.id, remember);
-                Utils.toast(`Welcome back, ${user.name.split(' ')[0]}!`, 'success');
-                setTimeout(() => {
-                    window.location.href = user.role === 'technician' ? 'tech-dashboard.html' : 'student-dashboard.html';
-                }, 800);
-            };
-        }
-    },
-};
+///* LOGIN */
+//const LoginPage = {
+//    init() {
+//        const form = document.querySelector('form');
+//        if (!form) return;
+//
+//        // demo buttons
+//        document.querySelectorAll('.demo-buttons button').forEach(btn => {
+////            btn.addEventListener('click', () => {
+////                const emailInput = form.querySelector('input[type="email"]');
+////                const pwInput = form.querySelector('input[type="password"]');
+////                if (emailInput) emailInput.value = btn.textContent.trim().replace(/^(Student|Technician): /, '');
+////                if (pwInput) pwInput.value = 'password123';
+////            });
+//        });
+//
+//        const loginBtn = form.querySelector('.login-btn');
+//        if (loginBtn) {
+//            loginBtn.onclick = (e) => {
+//                e.preventDefault();
+//                const email = form.querySelector('input[type="email"]')?.value.trim();
+//                const password = form.querySelector('input[type="password"]')?.value;
+//                const remember = form.querySelector('input[type="checkbox"]')?.checked;
+//
+//                if (!email || !password) return Utils.toast('Please enter email and password.', 'error');
+//
+//                const users = Store.getUsers();
+//                const user = users.find(u => u.email === email && u.password === password);
+//                if (!user) return Utils.toast('Invalid email or password.', 'error');
+//
+//                Store.setSession(user.id, remember);
+//                Utils.toast(`Welcome back, ${user.name.split(' ')[0]}!`, 'success');
+//                setTimeout(() => {
+//                    window.location.href = user.role === 'technician' ? 'tech-dashboard.html' : 'student-dashboard.html';
+//                }, 800);
+//            };
+//        }
+//    },
+//};
 
 /* STUDENT DASHBOARD */
 const StudentDashboard = {

@@ -54,29 +54,28 @@
                 <div class="demo">
                     <p>Demo Accounts:</p>
                     <div class="demo-buttons">
-                        <button>Student: juan.delacruz@dlsu.edu</button>
-                        <button>Technician: carlos.reyes@dlsu.edu</button>
+                        <button>Student: juan.delacruz@dlsu.edu.ph</button>
+                        <button>Technician: carlos.reyes@dlsu.edu.ph</button>
                     </div>
                 </div>
 
-                <form>
+                <form action="/api/login" method="POST">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="username@dlsu.edu.ph" required>
 
-                    <label>Email Address</label>
-                    <input type="email" placeholder="username@dlsu.edu.ph">
-
-                    <label>Password</label>
-                    <input type="password" placeholder="Enter your password">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
                     <div class="options">
                         <label class="remember">
-                            <input type="checkbox">
-                            Remember me
+                            <input type="checkbox" name="remember"> Remember me
                         </label>
                     </div>
 
-                    <a href="/student-dashboard"><button class="login-btn">Sign In</button></a>
-
+                    <button type="submit" class="login-btn">Sign In</button>
                 </form>
+
+
 
                 <p class="register">
                     Don't have an account?

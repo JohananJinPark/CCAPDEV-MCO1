@@ -2,11 +2,14 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
+
 require('dotenv').config({ path: path.join(__dirname, 'port.env') });
 dotenv.config();
 const app = express();
 
 // Middleware to handle JSON data and static files
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // This allows reading form data
 app.use(express.json());
 app.use(express.static('public'));
 app.use(express.static('assets'));
@@ -76,4 +79,26 @@ app.get('/view-slots', (req, res) => {
 // My Reservations
 app.get('/my-reservations', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'my-reservations.html'));
+});
+
+const User = require('./models/User');
+
+// Required middleware to read the form data
+app.use(express.urlencoded({ extended: true }));
+
+app.post('/api/login', async (req, res) => {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email, password });
+
+    if (user) {
+        // DO NOT use res.json(user) or res.send(user)
+        // USE res.redirect to move the browser to a new page
+        if (user.role === 'technician') {
+            res.redirect('/tech-dashboard');
+        } else {
+            res.redirect('/student-dashboard');
+        }
+    } else {
+        res.send("Invalid login. <a href='/login'>Try again</a>");
+    }
 });
