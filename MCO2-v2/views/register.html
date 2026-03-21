@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LabReserve Register</title>
-    <link rel="stylesheet" href="register.css">
+    <link rel="stylesheet" href="/register.css">
 </head>
 
 <body>
@@ -27,84 +27,115 @@
 
             </div>
 
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="regName" placeholder="e.g. Juan Dela Cruz" required>
+                </div>
 
-            <!-- FORM CARD -->
-            <div class="register-card">
+                <div class="form-group">
+                    <label>DLSU Email Address</label>
+                    <input type="email" id="regEmail" placeholder="username@dlsu.edu.ph" required>
+                    <small>Must end with @dlsu.edu.ph</small>
+                </div>
 
-                <form>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="regPw" placeholder="Minimum 8 characters" required>
+                </div>
 
-                    <!-- NAME -->
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" placeholder="e.g. Juan Dela Cruz">
-                    </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="regConfirmPw" placeholder="Re-enter your password" required>
+                </div>
 
+                <div class="form-group">
+                    <label>Account Role</label>
+                    <select id="regRole" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                        <option value="student">Student</option>
+                        <option value="technician">Lab Technician</option>
+                    </select>
+                </div>
 
-                    <!-- EMAIL -->
-                    <div class="form-group">
-                        <label>DLSU Email Address</label>
-                        <input type="email" placeholder="username@dlsu.edu.ph">
-                        <small>Must end with @dlsu.edu.ph</small>
-                    </div>
+                <button type="submit" class="submit-btn">Create Account</button>
+            </form>
+<!--            &lt;!&ndash; FORM CARD &ndash;&gt;-->
+<!--            <div class="register-card">-->
 
+<!--                <form>-->
 
-                    <!-- PASSWORD -->
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" placeholder="Minimum 8 characters">
-
-                        <div class="strength-bar">
-                            <div></div>
-                            <div></div>
-                            <div></div>
-                            <div></div>
-                        </div>
-
-                        <p class="strength-text">Password strength</p>
-                    </div>
-
-
-                    <!-- CONFIRM PASSWORD -->
-                    <div class="form-group">
-                        <label>Confirm Password</label>
-                        <input type="password" placeholder="Re-enter your password">
-                    </div>
-
-
-                    <!-- ROLE -->
-                    <div class="form-group">
-                        <label>Account Role</label>
-
-                        <div class="role-options">
-
-                            <button type="button" class="role-btn active">
-                                Student
-                            </button>
-
-                            <button type="button" class="role-btn">
-                                Lab Technician
-                            </button>
-
-                        </div>
-
-                        <p class="role-desc">
-                            Access lab reservation and personal booking features.
-                        </p>
-
-                    </div>
+<!--                    &lt;!&ndash; NAME &ndash;&gt;-->
+<!--                    <div class="form-group">-->
+<!--                        <label>Full Name</label>-->
+<!--                        <input type="text" placeholder="e.g. Juan Dela Cruz">-->
+<!--                    </div>-->
 
 
-                    <!-- SUBMIT -->
-                    <a href="/student-dashboard"><button class="submit-btn">Create Account</button>
+<!--                    &lt;!&ndash; EMAIL &ndash;&gt;-->
+<!--                    <div class="form-group">-->
+<!--                        <label>DLSU Email Address</label>-->
+<!--                        <input type="email" placeholder="username@dlsu.edu.ph">-->
+<!--                        <small>Must end with @dlsu.edu.ph</small>-->
+<!--                    </div>-->
 
-                </form>
 
-                <p class="signin">
-                    Already have an account?
-                    <a href="/login">Sign in</a>
-                </p>
+<!--                    &lt;!&ndash; PASSWORD &ndash;&gt;-->
+<!--                    <div class="form-group">-->
+<!--                        <label>Password</label>-->
+<!--                        <input type="password" placeholder="Minimum 8 characters">-->
 
-            </div>
+<!--                        <div class="strength-bar">-->
+<!--                            <div></div>-->
+<!--                            <div></div>-->
+<!--                            <div></div>-->
+<!--                            <div></div>-->
+<!--                        </div>-->
+
+<!--                        <p class="strength-text">Password strength</p>-->
+<!--                    </div>-->
+
+
+<!--                    &lt;!&ndash; CONFIRM PASSWORD &ndash;&gt;-->
+<!--                    <div class="form-group">-->
+<!--                        <label>Confirm Password</label>-->
+<!--                        <input type="password" placeholder="Re-enter your password">-->
+<!--                    </div>-->
+
+
+<!--                    &lt;!&ndash; ROLE &ndash;&gt;-->
+<!--                    <div class="form-group">-->
+<!--                        <label>Account Role</label>-->
+
+<!--                        <div class="role-options">-->
+
+<!--                            <button type="button" class="role-btn active">-->
+<!--                                Student-->
+<!--                            </button>-->
+
+<!--                            <button type="button" class="role-btn">-->
+<!--                                Lab Technician-->
+<!--                            </button>-->
+
+<!--                        </div>-->
+
+<!--                        <p class="role-desc">-->
+<!--                            Access lab reservation and personal booking features.-->
+<!--                        </p>-->
+
+<!--                    </div>-->
+
+
+<!--                    &lt;!&ndash; SUBMIT &ndash;&gt;-->
+<!--                    <a href="/student-dashboard"><button class="submit-btn">Create Account</button>-->
+
+<!--                </form>-->
+
+<!--                <p class="signin">-->
+<!--                    Already have an account?-->
+<!--                    <a href="/login">Sign in</a>-->
+<!--                </p>-->
+
+<!--            </div>-->
 
 
             <p class="note">
@@ -115,8 +146,7 @@
 
     </div>
 
-    <script src="app.js"></script>
-
+    <script src="/app.js?v=2"></script>
 </body>
 
 </html>

@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
+const User = require('./models/User');
+const Reservation = require('./models/Reservation');
 
 require('dotenv').config({ path: path.join(__dirname, 'port.env') });
 dotenv.config();
@@ -9,7 +11,7 @@ const app = express();
 
 // Middleware to handle JSON data and static files
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // This allows reading form data
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 app.use(express.static('assets'));
@@ -29,7 +31,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
 });
-
 
 // Route to get reservation
 app.get('/api/reservations', async (req, res) => {
@@ -71,10 +72,6 @@ app.get('/my-reservations', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'my-reservations.html'));
 });
 
-const User = require('./models/User');
-
-
-
 // Route To Login
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
@@ -103,28 +100,24 @@ app.post('/api/login', async (req, res) => {
 // Route to Register
 app.post('/api/register', async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, role } = req.body;
 
-        // Check if user already exists
+        // 1. Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.send("Email already registered. <a href='/register'>Try again</a>");
+            return res.status(400).json({ message: "Email is already registered." });
         }
 
-        // Create new user (defaulting to student for this example)
+        // 2. Save new user to MongoDB
         const newUser = new User({
-            name,
-            email,
-            password,
-            role: 'student', // You can adjust this based on your form
-            avatarColor: '#006B3F'
+            name, email, password, role, avatarColor: '#006B3F'
         });
-
         await newUser.save();
-        res.redirect('/login'); // Send them to login page after creating account
+
+        res.status(200).json({ success: true, message: "Account created successfully!" });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Error creating account.");
+        console.error("Registration error:", err);
+        res.status(500).json({ message: "Server error creating account." });
     }
 });
 

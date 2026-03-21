@@ -71,83 +71,43 @@ const AuthUI = {
 
 const RegisterPage = {
     init() {
-        const form = document.querySelector('form');
+        const form = document.getElementById('registerForm');
         if (!form) return;
 
-        const pwInput = form.querySelectorAll('input[type="password"]')[0];
-        const confirmPwInput = form.querySelectorAll('input[type="password"]')[1];
-        const nameInput = form.querySelector('input[type="text"]');
-        const emailInput = form.querySelector('input[type="email"]');
-        const bars = form.querySelectorAll('.strength-bar div');
-        const strengthText = form.querySelector('.strength-text');
-        const roleButtons = form.querySelectorAll('.role-btn');
-        const roleDesc = form.querySelector('.role-desc');
-        let selectedRole = 'student';
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Stop page from refreshing immediately
 
-        // Role toggle UI
-        roleButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                roleButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                selectedRole = btn.textContent.trim().toLowerCase().includes('tech') ? 'technician' : 'student';
-                if (roleDesc) roleDesc.textContent = selectedRole === 'technician'
-                    ? 'Manage lab reservations and assist walk-in students.'
-                    : 'Access lab reservation and personal booking features.';
-            });
-        });
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pw = document.getElementById('regPw').value;
+            const confirmPw = document.getElementById('regConfirmPw').value;
+            const role = document.getElementById('regRole').value;
 
-        // Password strength UI
-        if (pwInput && bars.length) {
-            pwInput.addEventListener('input', () => {
-                const score = Utils.passwordStrength(pwInput.value);
-                const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
-                const labels = ['Weak', 'Fair', 'Good', 'Strong'];
-                bars.forEach((bar, i) => {
-                    bar.style.background = i < score ? colors[score - 1] : '#e5e7eb';
+            // Basic Validation
+            if (!Utils.isValidDLSUEmail(email)) return Utils.toast('Must use a valid @dlsu.edu.ph email.', 'error');
+            if (pw.length < 8) return Utils.toast('Password must be at least 8 characters.', 'error');
+            if (pw !== confirmPw) return Utils.toast('Passwords do not match.', 'error');
+
+            try {
+                // Send to backend
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password: pw, role })
                 });
-                if (strengthText) {
-                    strengthText.textContent = pwInput.value ? `Password strength: ${labels[score - 1] || 'Too short'}` : 'Password strength';
-                    strengthText.style.color = score >= 3 ? '#22c55e' : score >= 2 ? '#eab308' : '#ef4444';
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    Utils.toast('Account created! Redirecting to login...', 'success');
+                    setTimeout(() => window.location.href = '/login', 1500);
+                } else {
+                    Utils.toast(data.message || 'Registration failed.', 'error');
                 }
-            });
-        }
-
-        // Submit Logic
-        const submitBtn = document.querySelector('.submit-btn');
-        if (submitBtn) {
-            submitBtn.addEventListener('click', async (e) => {
-                e.preventDefault(); // Stop standard HTML submission to handle it via JS
-
-                const name = nameInput?.value.trim();
-                const email = emailInput?.value.trim();
-                const pw = pwInput?.value;
-                const confirm = confirmPwInput?.value;
-
-                if (!name) return Utils.toast('Please enter your full name.', 'error');
-                if (!Utils.isValidDLSUEmail(email)) return Utils.toast('Must use a DLSU email address (@dlsu.edu.ph).', 'error');
-                if (pw.length < 8) return Utils.toast('Password must be at least 8 characters.', 'error');
-                if (pw !== confirm) return Utils.toast('Passwords do not match.', 'error');
-
-                try {
-                    // Send data to server
-                    const response = await fetch('/api/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, email, password: pw, role: selectedRole })
-                    });
-
-                    if (response.ok) {
-                        Utils.toast('Account created! Redirecting to login...', 'success');
-                        setTimeout(() => { window.location.href = '/login'; }, 1500);
-                    } else {
-                        const errorData = await response.json();
-                        Utils.toast(errorData.message || 'Registration failed.', 'error');
-                    }
-                } catch (err) {
-                    Utils.toast('Server connection error.', 'error');
-                }
-            });
-        }
+            } catch (err) {
+                Utils.toast('Server connection error.', 'error');
+            }
+        });
     }
 };
 
@@ -177,26 +137,72 @@ const ViewSlotsPage = {
     init() {
         AuthUI.injectNavbar('student');
 
-        // Make the static seats clickable for visual feedback
+        // Restore seat clicking logic
         document.querySelectorAll('.seat').forEach(seat => {
             seat.addEventListener('click', function() {
+                // If it's not already reserved by someone else
                 if (!this.classList.contains('reserved')) {
-                    document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected-seat'));
-                    this.classList.add('selected-seat');
+                    // Remove selection from all other seats
+                    document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected-seat', 'selected'));
 
-                    // Show a quick visual confirmation panel update
-                    const confirmBtn = document.getElementById('confirm-reserve-btn');
-                    if(confirmBtn) {
-                        confirmBtn.disabled = false;
-                        confirmBtn.style.opacity = '1';
-                        confirmBtn.textContent = `Reserve Selected Slots – Seat ${this.textContent}`;
+                    // Add selection to clicked seat
+                    this.classList.add('selected-seat', 'selected');
+
+                    // Update side panel if it exists
+                    const panel = document.querySelector('.seat-panel');
+                    if(panel) {
+                        panel.innerHTML = `
+                            <h3>Seat ${this.textContent} Selected</h3>
+                            <button class="confirm-btn" style="background:#006B3F; color:white; padding:10px; border:none; border-radius:8px; width:100%; margin-top:15px; cursor:pointer;">
+                                Confirm Reservation
+                            </button>
+                        `;
+
+                        // Fake confirm button for UI purposes
+                        panel.querySelector('.confirm-btn').addEventListener('click', () => {
+                            Utils.toast(`Seat ${this.textContent} successfully reserved!`, 'success');
+                            this.classList.remove('selected-seat', 'selected');
+                            this.classList.add('reserved');
+                            panel.innerHTML = `<h3>Select a seat</h3><p>Click any available seat to reserve it.</p>`;
+                        });
                     }
                 }
             });
         });
     }
 };
+const SearchPage = {
+    init() {
+        AuthUI.injectNavbar('student');
 
+        // Restore search button click
+        const searchBtn = document.querySelector('.search-btn');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', () => {
+                Utils.toast('Searching database for available slots...', 'success');
+                // You can add logic here later to fetch specific dates from MongoDB
+            });
+        }
+    }
+};
+
+const MyReservationsPage = {
+    init() {
+        AuthUI.injectNavbar('student');
+
+        // Make edit/cancel buttons functional in UI
+        document.querySelectorAll('.cancel').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if(confirm("Are you sure you want to cancel this reservation?")) {
+                    this.closest('.reservation-card').style.opacity = '0.5';
+                    this.innerText = "Cancelled";
+                    this.disabled = true;
+                    Utils.toast('Reservation cancelled successfully.', 'success');
+                }
+            });
+        });
+    }
+};
 /* 4. ROUTER */
 document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
@@ -209,8 +215,12 @@ document.addEventListener('DOMContentLoaded', () => {
         TechDashboard.init();
     } else if (path.includes('view-slots')) {
         ViewSlotsPage.init();
-    } else if (path.includes('my-reservations') || path.includes('search')) {
+    } else if (path.includes('my-reservations')) {
         AuthUI.injectNavbar('student');
+        MyReservationsPage.init();
+    } else if (path.includes('search')) {
+        AuthUI.injectNavbar('student');
+        SearchPage.init();
     } else if (path.includes('manage-reservations') || path.includes('all-reservations')) {
         AuthUI.injectNavbar('technician');
     }
