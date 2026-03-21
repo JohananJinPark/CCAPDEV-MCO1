@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reservations</title>
+    <link rel="stylesheet" href="my-reservations.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="header">
+
+            <div>
+                <h1>My Reservations</h1>
+                <p>Manage all your lab seat bookings</p>
+            </div>
+
+            <a href="/my-reservations"><button class="new-btn">+ New Reservation</button></a>
+
+        </div>
+
+
+        <!-- SUMMARY CARDS -->
+
+        <div class="summary">
+
+            <div class="summary-card active">
+                <h2>5</h2>
+                <p>Total</p>
+            </div>
+
+            <div class="summary-card">
+                <h2>3</h2>
+                <p>Confirmed</p>
+            </div>
+
+            <div class="summary-card">
+                <h2>2</h2>
+                <p>Pending</p>
+            </div>
+
+        </div>
+
+
+        <!-- FILTER -->
+
+        <div class="filter">
+
+            <span>Filter:</span>
+
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Confirmed</button>
+            <button class="filter-btn">Pending</button>
+            <button class="filter-btn">Cancelled</button>
+
+        </div>
+
+
+        <!-- RESERVATIONS LIST -->
+
+        <div class="reservations">
+
+
+            <!-- RESERVATION CARD -->
+
+            <div class="reservation-card">
+
+                <div class="seat">12</div>
+
+                <div class="info">
+
+                    <div class="top">
+
+                        <h3>Gokongwei Lab – Seat 12</h3>
+
+                        <span class="status confirmed">Confirmed</span>
+
+                    </div>
+
+                    <div class="details">
+
+                        <span>💻 Gokongwei Lab</span>
+                        <span>📅 Feb 23, 2026</span>
+                        <span>⏰ 10:00 – 11:00</span>
+
+                    </div>
+
+                    <p class="booked">Booked on Feb 20, 2026</p>
+
+                </div>
+
+                <div class="actions">
+
+                    <button class="edit">Edit</button>
+                    <button class="cancel">Cancel</button>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="reservation-card">
+
+                <div class="seat">5</div>
+
+                <div class="info">
+
+                    <div class="top">
+
+                        <h3>Andrew Lab – Seat 5</h3>
+
+                        <span class="status pending">Pending</span>
+
+                    </div>
+
+                    <div class="details">
+
+                        <span>💻 Andrew Lab</span>
+                        <span>📅 Feb 24, 2026</span>
+                        <span>⏰ 1:00 – 2:00</span>
+
+                    </div>
+
+                    <p class="booked">Booked on Feb 21, 2026</p>
+
+                </div>
+
+                <div class="actions">
+
+                    <button class="edit">Edit</button>
+                    <button class="cancel">Cancel</button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

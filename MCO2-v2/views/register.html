@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabReserve Register</title>
+    <link rel="stylesheet" href="register.css">
+</head>
+
+<body>
+
+    <div class="register-page">
+
+        <div class="register-container">
+
+            <!-- HEADER -->
+            <div class="register-header">
+                <a href="/" class="back-link">← Back to Home</a>
+
+                <div class="logo">
+                    <h1>AnimoLabs</h1>
+                </div>
+
+                <h2>Create your account</h2>
+                <p>Join DLSU's lab reservation system</p>
+
+            </div>
+
+
+            <!-- FORM CARD -->
+            <div class="register-card">
+
+                <form>
+
+                    <!-- NAME -->
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" placeholder="e.g. Juan Dela Cruz">
+                    </div>
+
+
+                    <!-- EMAIL -->
+                    <div class="form-group">
+                        <label>DLSU Email Address</label>
+                        <input type="email" placeholder="username@dlsu.edu.ph">
+                        <small>Must end with @dlsu.edu.ph</small>
+                    </div>
+
+
+                    <!-- PASSWORD -->
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" placeholder="Minimum 8 characters">
+
+                        <div class="strength-bar">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+
+                        <p class="strength-text">Password strength</p>
+                    </div>
+
+
+                    <!-- CONFIRM PASSWORD -->
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" placeholder="Re-enter your password">
+                    </div>
+
+
+                    <!-- ROLE -->
+                    <div class="form-group">
+                        <label>Account Role</label>
+
+                        <div class="role-options">
+
+                            <button type="button" class="role-btn active">
+                                Student
+                            </button>
+
+                            <button type="button" class="role-btn">
+                                Lab Technician
+                            </button>
+
+                        </div>
+
+                        <p class="role-desc">
+                            Access lab reservation and personal booking features.
+                        </p>
+
+                    </div>
+
+
+                    <!-- SUBMIT -->
+                    <a href="/student-dashboard"><button class="submit-btn">Create Account</button>
+
+                </form>
+
+                <p class="signin">
+                    Already have an account?
+                    <a href="/login">Sign in</a>
+                </p>
+
+            </div>
+
+
+            <p class="note">
+                Registration is restricted to @dlsu.edu.ph email addresses only.
+            </p>
+
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

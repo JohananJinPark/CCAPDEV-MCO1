@@ -1,0 +1,273 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", sans-serif;
+}
+
+body {
+    background: #f7f9f8;
+    padding: 40px;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+}
+
+.header h1 {
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.header p {
+    color: #666;
+    font-size: 14px;
+    margin-top: 4px;
+    margin-bottom: 20px;
+}
+
+/* SUCCESS */
+
+.success {
+    background: #e8f5ee;
+    border: 1px solid #b7e3cc;
+    padding: 12px;
+    border-radius: 12px;
+    color: #166534;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* GRID */
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+}
+
+.left {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* CARD */
+
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #eee;
+}
+
+/* PROFILE */
+
+.profile-card {
+    text-align: center;
+}
+
+.avatar {
+    width: 90px;
+    height: 90px;
+    background: #006B3F;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    font-size: 36px;
+    font-weight: bold;
+    margin: auto;
+    margin-bottom: 10px;
+}
+
+.avatar-colors {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.avatar-colors div {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+}
+
+.profile-card h2 {
+    font-size: 20px;
+}
+
+.email {
+    color: #777;
+    font-size: 14px;
+}
+
+.role {
+    margin-top: 8px;
+    display: inline-block;
+    background: #e8f5ee;
+    color: #006B3F;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+/* STATS */
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 14px;
+}
+
+/* CARD HEADER */
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.card-header a {
+    color: #006B3F;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+/* BUTTON */
+
+.edit-btn {
+    border: 1px solid #ddd;
+    background: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* FIELD */
+
+.field {
+    margin-bottom: 15px;
+}
+
+.field label {
+    font-size: 13px;
+    color: #777;
+}
+
+.value {
+    margin-top: 5px;
+    background: #f5f5f5;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+/* RESERVATION */
+
+.reservation {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8f8f8;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.seat {
+    width: 35px;
+    height: 35px;
+    background: #006B3F;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.res-info {
+    flex: 1;
+}
+
+.res-info p {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.res-info span {
+    font-size: 12px;
+    color: #777;
+}
+
+/* STATUS */
+
+.status {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 20px;
+    text-transform: capitalize;
+}
+
+.confirmed {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.pending {
+    background: #fef9c3;
+    color: #854d0e;
+}
+
+/* DANGER */
+
+.danger {
+    border: 1px solid #fecaca;
+}
+
+.danger h3 {
+    color: #dc2626;
+    margin-bottom: 10px;
+}
+
+.danger p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.delete-btn {
+    background: white;
+    border: 2px solid #fecaca;
+    color: #dc2626;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background: #fee2e2;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px) {
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+}
