@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="/student-dashboard.css">
+</head>
+
+<body>
+
+    <div class="dashboard"> 
+
+        <!-- HEADER -->
+        <div class="header">
+            <div>
+                <h1>Welcome back, Student</h1>
+                <p>Monday, February 23, 2026</p>
+            </div>
+
+            <a href="/view-slots" class="reserve-btn">
+                + Reserve a Seat
+            </a>
+        </div>
+
+
+        <!-- STATS -->
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-icon green"></div>
+                <h2>3</h2>
+                <p>Upcoming Reservations</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon blue"></div>
+                <h2>1</h2>
+                <p>Sessions Today</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon purple"></div>
+                <h2>3</h2>
+                <p>Labs Open Today</p>
+            </div>
+
+        </div>
+
+
+        <!-- QUICK ACTIONS -->
+
+        <h2 class="section-title">Quick Actions</h2>
+
+        <div class="actions-grid">
+
+            <a href="/view-slots" class="action-card">
+                <div class="action-icon green"></div>
+                <h3>Quick Reserve</h3>
+                <p>Book a seat now</p>
+            </a>
+
+            <a href="/my-reservations" class="action-card">
+                <div class="action-icon blue"></div>
+                <h3>My Reservations</h3>
+                <p>View all bookings</p>
+            </a>
+
+            <a href="/search" class="action-card">
+                <div class="action-icon yellow"></div>
+                <h3>Search Slots</h3>
+                <p>Find available seats</p>
+            </a>
+
+            <a href="/view-slots" class="action-card">
+                <div class="action-icon purple"></div>
+                <h3>View Labs</h3>
+                <p>Browse all labs</p>
+            </a>
+
+        </div>
+
+
+        <!-- UPCOMING RESERVATIONS -->
+
+        <div class="grid-2">
+
+            <div class="card">
+                <h2>Upcoming Reservations</h2>
+
+                <div class="reservation">
+                    <div class="seat">12</div>
+                    <div>
+                        <h4>Gokongwei Lab – Seat 12</h4>
+                        <p>Feb 23 • 10:00 – 12:00</p>
+                    </div>
+                    <span class="status confirmed">Confirmed</span>
+                </div>
+
+                <div class="reservation">
+                    <div class="seat">8</div>
+                    <div>
+                        <h4>Andrew Lab – Seat 8</h4>
+                        <p>Feb 25 • 14:00 – 16:00</p>
+                    </div>
+                    <span class="status pending">Pending</span>
+                </div>
+
+            </div>
+
+
+            <!-- AVAILABLE LABS -->
+
+            <div class="card">
+
+                <h2>Available Labs</h2>
+
+                <div class="lab">
+                    <h4>Gokongwei Lab</h4>
+                    <p>20 / 40 seats available</p>
+                </div>
+
+                <div class="lab">
+                    <h4>Andrew Lab</h4>
+                    <p>10 / 30 seats available</p>
+                </div>
+
+                <div class="lab">
+                    <h4>Velasco Lab</h4>
+                    <p>5 / 25 seats available</p>
+                </div>
+
+                <a href="/view-slots" class="reserve-btn full">
+                    Reserve a Seat
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- NOTICE -->
+
+        <div class="notice">
+            Reminder: Lab reservations must be cancelled 30 minutes before the session.
+        </div>
+
+
+    </div>
+    <script src="/app.js?v=2"></script></body>
+
+</html>

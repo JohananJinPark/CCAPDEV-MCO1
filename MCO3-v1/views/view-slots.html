@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="/view-slots.css">
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div>
+        <h1>View Lab Slots</h1>
+        <p>Select a lab and date to view seat availability</p>
+      </div>
+
+      <button class="refresh">⟳ Refresh</button>
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div class="filters">
+
+      <div class="filter">
+        <label>Select Laboratory</label>
+        <select>
+          <option>Gokongwei Lab – Gokongwei Hall</option>
+          <option>Andrew Lab – Andrew Building</option>
+          <option>Velasco Lab – Velasco Hall</option>
+        </select>
+      </div>
+
+      <div class="filter">
+        <label>Select Date</label>
+
+        <div class="dates">
+          <button class="date active">Mon<br>Feb 23</button>
+          <button class="date">Tue<br>Feb 24</button>
+          <button class="date">Wed<br>Feb 25</button>
+          <button class="date">Thu<br>Feb 26</button>
+          <button class="date">Fri<br>Feb 27</button>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- LAB INFO -->
+
+    <div class="lab-info">
+      <div class="lab-icon">💻</div>
+
+      <div>
+        <h3>Gokongwei Lab</h3>
+        <p>Gokongwei Hall • 40 seats</p>
+      </div>
+
+      <span class="updated">Updated 10:24 AM</span>
+
+    </div>
+
+
+    <!-- LEGEND -->
+
+    <div class="legend">
+
+      <div class="legend-item">
+        <div class="box available"></div> Available
+      </div>
+
+      <div class="legend-item">
+        <div class="box reserved"></div> Reserved
+      </div>
+
+      <div class="legend-item">
+        <div class="box blocked"></div> Blocked
+      </div>
+
+      <div class="legend-item">
+        <div class="box mine"></div> My Reservation
+      </div>
+
+    </div>
+
+
+    <!-- MAIN GRID -->
+
+    <div class="main-grid">
+
+      <!-- SEAT MAP -->
+
+      <div class="seat-map">
+
+        <h2>Seat Map</h2>
+
+        <div class="instructor">Instructor Desk</div>
+
+        <div class="seats">
+
+          <button class="seat available">1</button>
+          <button class="seat available">2</button>
+          <button class="seat reserved">3</button>
+          <button class="seat available">4</button>
+          <button class="seat blocked">5</button>
+
+          <button class="seat available">6</button>
+          <button class="seat available">7</button>
+          <button class="seat mine">8</button>
+          <button class="seat available">9</button>
+          <button class="seat reserved">10</button>
+
+          <button class="seat available">11</button>
+          <button class="seat available">12</button>
+          <button class="seat available">13</button>
+          <button class="seat available">14</button>
+          <button class="seat available">15</button>
+
+        </div>
+
+      </div>
+
+
+      <!-- SEAT PANEL -->
+
+      <div class="seat-panel">
+
+        <h3>Select a seat</h3>
+
+        <p>Click any available seat to see details.</p>
+
+        <div class="summary">
+
+          <h4>Lab Summary</h4>
+
+          <div class="summary-item">
+            <span>Available</span>
+            <span>30</span>
+          </div>
+
+          <div class="summary-item">
+            <span>Reserved</span>
+            <span>8</span>
+          </div>
+
+          <div class="summary-item">
+            <span>Blocked</span>
+            <span>2</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/app.js?v=2"></script></body>
+
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="/tech-dashboard.css">
+</head>
+
+<body>
+
+  <div class="dashboard">
+
+    <!-- HEADER -->
+
+    <div class="header">
+      <div>
+        <h1>Lab Technician Dashboard</h1>
+        <p>Sunday, February 23, 2026</p>
+      </div>
+
+      <div class="system-status">
+        <span class="dot"></span>
+        System Active
+      </div>
+    </div>
+
+
+    <!-- STATS -->
+
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <div class="icon green"></div>
+        <h2>12</h2>
+        <p class="label">Active Today</p>
+        <span class="sub">confirmed reservations</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon yellow"></div>
+        <h2>4</h2>
+        <p class="label">Pending</p>
+        <span class="sub">awaiting confirmation</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon blue"></div>
+        <h2>16</h2>
+        <p class="label">Total Reservations</p>
+        <span class="sub">all labs combined</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon purple"></div>
+        <h2>10</h2>
+        <p class="label">Students</p>
+        <span class="sub">with reservations today</span>
+      </div>
+
+    </div>
+
+
+    <!-- QUICK ACTIONS -->
+
+    <h2 class="section-title">Quick Actions</h2>
+
+    <div class="actions-grid">
+
+      <a href="/reserve-student" class="action-card">
+        <div class="icon green"></div>
+        <h3>Reserve for Student</h3>
+        <p>Book on behalf of student</p>
+      </a>
+
+      <a href="/manage-reservations" class="action-card">
+        <div class="icon blue"></div>
+        <h3>Manage Reservations</h3>
+        <p>Edit or remove bookings</p>
+      </a>
+
+      <a href="/all-reservations" class="action-card">
+        <div class="icon yellow"></div>
+        <h3>All Reservations</h3>
+        <p>View full reservation list</p>
+      </a>
+
+      <a href="/view-slots" class="action-card">
+        <div class="icon purple"></div>
+        <h3>View Labs</h3>
+        <p>Check lab seat maps</p>
+      </a>
+
+    </div>
+
+
+    <!-- MAIN GRID -->
+
+    <div class="main-grid">
+
+
+      <!-- TODAY RESERVATIONS -->
+
+      <div class="card">
+
+        <div class="card-header">
+          <h2>Today's Reservations</h2>
+          <a href="/all-reservations">View All →</a>
+        </div>
+
+        <div class="reservation">
+
+          <div class="seat">12</div>
+
+          <div>
+            <h4>John Cruz</h4>
+            <p>Gokongwei Lab • Seat 12 • 10:00 – 12:00</p>
+          </div>
+
+          <span class="status confirmed">Confirmed</span>
+
+        </div>
+
+
+        <div class="reservation">
+
+          <div class="seat">7</div>
+
+          <div>
+            <h4>Maria Santos</h4>
+            <p>Andrew Lab • Seat 7 • 13:00 – 15:00</p>
+          </div>
+
+          <span class="status pending">Pending</span>
+
+        </div>
+
+      </div>
+
+
+      <!-- LAB STATUS -->
+
+      <div class="card">
+
+        <h2>Lab Status</h2>
+
+        <div class="lab">
+
+          <div class="lab-header">
+            <span>Gokongwei Lab</span>
+            <span>20/40</span>
+          </div>
+
+          <div class="progress">
+            <div class="progress-fill green" style="width:50%"></div>
+          </div>
+
+          <p>50% occupied</p>
+
+        </div>
+
+
+        <div class="lab">
+
+          <div class="lab-header">
+            <span>Andrew Lab</span>
+            <span>25/30</span>
+          </div>
+
+          <div class="progress">
+            <div class="progress-fill yellow" style="width:83%"></div>
+          </div>
+
+          <p>83% occupied</p>
+
+        </div>
+
+
+        <div class="lab">
+
+          <div class="lab-header">
+            <span>Velasco Lab</span>
+            <span>10/25</span>
+          </div>
+
+          <div class="progress">
+            <div class="progress-fill green" style="width:40%"></div>
+          </div>
+
+          <p>40% occupied</p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ALERT -->
+
+    <div class="alert">
+
+      ⚠ 4 pending reservations need attention.
+      <a href="#">Review →</a>
+
+    </div>
+
+
+  </div>
+  <script src="/app.js?v=2"></script></body>
+
+</html>

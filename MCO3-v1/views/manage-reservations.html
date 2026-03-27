@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Reservations</title>
+    <link rel="stylesheet" href="manage-reservations.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <h1>Manage Reservations</h1>
+            <p>View, edit, and remove all lab reservations</p>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <h2 style="color:#006B3F;">54</h2>
+                <p>Total Reservations</p>
+            </div>
+
+            <div class="stat-card">
+                <h2 style="color:#3b82f6;">12</h2>
+                <p>Today's Reservations</p>
+            </div>
+
+            <div class="stat-card">
+                <h2 style="color:#d97706;">6</h2>
+                <p>Pending Approval</p>
+            </div>
+
+            <div class="stat-card">
+                <h2 style="color:#ef4444;">3</h2>
+                <p>Cancelled</p>
+            </div>
+
+        </div>
+
+        <!-- FILTERS -->
+        <div class="filters">
+
+            <input type="text" placeholder="Search by name, email, lab...">
+
+            <select>
+                <option>All Labs</option>
+                <option>Lab A</option>
+                <option>Lab B</option>
+                <option>Lab C</option>
+            </select>
+
+            <select>
+                <option>All Statuses</option>
+                <option>Confirmed</option>
+                <option>Pending</option>
+                <option>Cancelled</option>
+            </select>
+
+            <select>
+                <option>Sort: Date</option>
+                <option>Sort: Lab</option>
+                <option>Sort: Student</option>
+                <option>Sort: Status</option>
+            </select>
+
+        </div>
+
+        <p class="results">3 reservations found</p>
+
+        <!-- TABLE -->
+        <div class="table-card">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Seat</th>
+                        <th>Laboratory</th>
+                        <th>Student</th>
+                        <th>Date & Time</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+                            <div class="seat">12</div>
+                        </td>
+
+                        <td>Lab A</td>
+
+                        <td>
+                            <div class="student">
+                                <p class="name">Juan Dela Cruz</p>
+                                <p class="email">juan@dlsu.edu</p>
+                            </div>
+                        </td>
+
+                        <td>
+                            <p>Feb 23, 2026</p>
+                            <span class="time">10:00 – 11:00</span>
+                        </td>
+
+                        <td>
+                            <span class="status confirmed">Confirmed</span>
+                        </td>
+
+                        <td>
+                            <div class="actions">
+                                <button class="edit">✏️</button>
+                                <button class="delete">🗑️</button>
+                            </div>
+                        </td>
+
+                    </tr>
+
+
+                    <tr class="alt">
+
+                        <td>
+                            <div class="seat">5</div>
+                        </td>
+
+                        <td>Lab B</td>
+
+                        <td>
+                            <div class="student">
+                                <p class="name">Anonymous</p>
+                                <p class="email">anon@dlsu.edu</p>
+                            </div>
+                        </td>
+
+                        <td>
+                            <p>Feb 23, 2026</p>
+                            <span class="time">12:00 – 1:00</span>
+                        </td>
+
+                        <td>
+                            <span class="status pending">Pending</span>
+                        </td>
+
+                        <td>
+                            <div class="actions">
+                                <button class="edit">✏️</button>
+                                <button class="delete">🗑️</button>
+                            </div>
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            <div class="seat">21</div>
+                        </td>
+
+                        <td>Lab C</td>
+
+                        <td>
+                            <div class="student">
+                                <p class="name">Maria Santos</p>
+                                <p class="email">maria@dlsu.edu</p>
+                            </div>
+                        </td>
+
+                        <td>
+                            <p>Feb 24, 2026</p>
+                            <span class="time">3:00 – 4:00</span>
+                        </td>
+
+                        <td>
+                            <span class="status cancelled">Cancelled</span>
+                        </td>
+
+                        <td>
+                            <div class="actions">
+                                <button class="edit">✏️</button>
+                                <button class="delete">🗑️</button>
+                            </div>
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <script src="/app.js?v=2"></script>
+</body>
+
+</html>

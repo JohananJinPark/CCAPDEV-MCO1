@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimoLabs Login</title>
+    <link rel="stylesheet" href="/login.css">
+</head>
+
+<body>
+
+    <div class="page">
+
+        <!-- LEFT PANEL -->
+        <div class="left-panel">
+
+            <div class="back">
+                <a href="/">Back to Home</a>
+            </div>
+            <div class="left-content">
+
+                <div class="logo">
+                    <div>
+                        <h1>AnimoLabs</h1>
+                        <p>De La Salle University</p>
+                    </div>
+                </div>
+
+                <h2>Welcome back to your lab management portal</h2>
+
+                <p class="desc">
+                    Sign in to reserve computer lab seats, view your upcoming sessions,
+                    and manage your reservations.
+                </p>
+
+            </div>
+
+            <div class="copyright">
+                © 2026 DLSU AnimoLabs
+            </div>
+
+        </div>
+
+
+        <!-- RIGHT PANEL -->
+        <div class="right-panel">
+
+            <div class="login-card">
+
+                <h2>Sign in to your account</h2>
+                <p class="subtitle">Use your DLSU credentials to continue</p>
+
+                <div class="demo">
+                    <p>Demo Accounts:</p>
+                    <div class="demo-buttons">
+                        <button>Student: juan.delacruz@dlsu.edu.ph</button>
+                        <button>Technician: carlos.reyes@dlsu.edu.ph</button>
+                    </div>
+                </div>
+
+                <form action="/api/login" method="POST">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="username@dlsu.edu.ph" required>
+
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+                    <div class="options">
+                        <label class="remember">
+                            <input type="checkbox" name="remember"> Remember me
+                        </label>
+                    </div>
+
+                    <button type="submit" class="login-btn">Sign In</button>
+                </form>
+
+
+
+                <p class="register">
+                    Don't have an account?
+                    <a href="/register">Register here</a>
+                </p>
+
+            </div>
+
+            <p class="note">
+                Only @dlsu.edu email addresses are accepted
+            </p>
+
+        </div>
+
+    </div>
+
+    <script src="/app.js?v=2"></script></body>
+
+</html>

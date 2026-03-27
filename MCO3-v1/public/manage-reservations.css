@@ -1,0 +1,201 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", sans-serif;
+}
+
+body {
+    background: #f7f9f8;
+    padding: 40px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* HEADER */
+
+.header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #111;
+}
+
+.header p {
+    color: #666;
+    font-size: 14px;
+    margin-top: 4px;
+    margin-bottom: 20px;
+}
+
+/* STATS */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #eee;
+    padding: 18px;
+}
+
+.stat-card h2 {
+    font-size: 24px;
+    margin-bottom: 3px;
+}
+
+.stat-card p {
+    font-size: 12px;
+    color: #666;
+}
+
+/* FILTERS */
+
+.filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.filters input,
+.filters select {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.filters input {
+    flex: 1;
+    min-width: 200px;
+}
+
+.results {
+    font-size: 12px;
+    color: #777;
+    margin-bottom: 15px;
+}
+
+/* TABLE */
+
+.table-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #eee;
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #f9fafb;
+}
+
+th {
+    text-align: left;
+    padding: 14px;
+    font-size: 12px;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+td {
+    padding: 14px;
+    font-size: 14px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.alt {
+    background: #fafafa;
+}
+
+/* SEAT */
+
+.seat {
+    width: 32px;
+    height: 32px;
+    background: #006B3F;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+/* STUDENT */
+
+.student .name {
+    font-weight: 600;
+}
+
+.student .email {
+    font-size: 12px;
+    color: #888;
+}
+
+/* TIME */
+
+.time {
+    font-size: 12px;
+    color: #888;
+}
+
+/* STATUS */
+
+.status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.confirmed {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.pending {
+    background: #fef9c3;
+    color: #854d0e;
+}
+
+.cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* ACTIONS */
+
+.actions {
+    display: flex;
+    gap: 6px;
+}
+
+.actions button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+}
+
+.actions .edit:hover {
+    color: #2563eb;
+}
+
+.actions .delete:hover {
+    color: #ef4444;
+}

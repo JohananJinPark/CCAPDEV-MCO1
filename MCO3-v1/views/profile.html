@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <link rel="stylesheet" href="/profile.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <h1>My Profile</h1>
+            <p>Manage your account information and preferences</p>
+        </div>
+
+
+        <!-- SUCCESS MESSAGE -->
+
+        <div class="success">
+            ✔ Profile updated successfully!
+        </div>
+
+
+        <div class="grid">
+
+            <!-- LEFT COLUMN -->
+            <div class="left">
+
+                <!-- PROFILE CARD -->
+
+                <div class="card profile-card">
+
+                    <div class="avatar">A</div>
+
+                    <div class="avatar-colors">
+                        <div style="background:#006B3F"></div>
+                        <div style="background:#1d4ed8"></div>
+                        <div style="background:#7c3aed"></div>
+                        <div style="background:#db2777"></div>
+                        <div style="background:#d97706"></div>
+                        <div style="background:#0891b2"></div>
+                    </div>
+
+                    <h2>Alex Cruz</h2>
+                    <p class="email">alex@email.com</p>
+
+                    <div class="role">Student</div>
+
+                </div>
+
+
+                <!-- ACCOUNT STATS -->
+
+                <div class="card">
+
+                    <h3>Account Stats</h3>
+
+                    <div class="stat">
+                        <span>Total Reservations</span>
+                        <b>12</b>
+                    </div>
+
+                    <div class="stat">
+                        <span>Confirmed</span>
+                        <b>9</b>
+                    </div>
+
+                    <div class="stat">
+                        <span>Upcoming</span>
+                        <b>4</b>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT COLUMN -->
+
+            <div class="right">
+
+                <!-- PROFILE INFO -->
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h3>Profile Information</h3>
+                        <button class="edit-btn">Edit</button>
+                    </div>
+
+                    <div class="field">
+                        <label>Full Name</label>
+                        <div class="value">Alex Cruz</div>
+                    </div>
+
+                    <div class="field">
+                        <label>Email Address</label>
+                        <div class="value">alex@email.com</div>
+                    </div>
+
+                    <div class="field">
+                        <label>Account Role</label>
+                        <div class="value">Student</div>
+                    </div>
+
+                    <div class="field">
+                        <label>Bio / Description</label>
+                        <div class="value">
+                            Computer Science student who loves working in the lab.
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+                <!-- RESERVATIONS -->
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h3>Current Reservations</h3>
+                        <a href="#">View all →</a>
+                    </div>
+
+                    <div class="reservation">
+
+                        <div class="seat">12</div>
+
+                        <div class="res-info">
+                            <p>Gokongwei Lab – Seat 12</p>
+                            <span>Feb 23 • 10:00 – 11:00</span>
+                        </div>
+
+                        <div class="status confirmed">confirmed</div>
+
+                    </div>
+
+
+                    <div class="reservation">
+
+                        <div class="seat">5</div>
+
+                        <div class="res-info">
+                            <p>Andrew Lab – Seat 5</p>
+                            <span>Feb 24 • 1:00 – 2:00</span>
+                        </div>
+
+                        <div class="status pending">pending</div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- DANGER ZONE -->
+
+                <div class="card danger">
+
+                    <h3>⚠ Danger Zone</h3>
+
+                    <p>
+                        Deleting your account is permanent. All your reservations will be cancelled and your data will
+                        be removed.
+                    </p>
+
+                    <button class="delete-btn">Delete Account</button>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="/app.js?v=2"></script>
+</body>
+
+</html>

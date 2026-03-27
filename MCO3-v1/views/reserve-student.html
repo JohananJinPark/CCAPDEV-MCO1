@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserve for Student</title>
+    <link rel="stylesheet" href="reserve-student.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <h1>Reserve for Student</h1>
+            <p>Create a reservation on behalf of a student</p>
+        </div>
+
+
+        <!-- SUCCESS BANNER -->
+
+        <div class="success">
+            ✔ Reservation created successfully! The student will be notified of their booking.
+        </div>
+
+
+        <!-- PROGRESS STEPS -->
+
+        <div class="steps">
+
+            <div class="step active">1</div>
+            <div class="line"></div>
+
+            <div class="step">2</div>
+            <div class="line"></div>
+
+            <div class="step">3</div>
+            <div class="line"></div>
+
+            <div class="step">4</div>
+
+        </div>
+
+
+        <div class="grid">
+
+            <!-- STUDENT SELECTION -->
+
+            <div class="card">
+
+                <h2>1. Select Student</h2>
+
+                <div class="search">
+                    <input type="text" placeholder="Search by name or email">
+                </div>
+
+
+                <div class="student-list">
+
+                    <div class="student selected">
+                        <div class="avatar">A</div>
+
+                        <div class="info">
+                            <p>Alex Cruz</p>
+                            <span>alex@email.com</span>
+                        </div>
+
+                        <span class="check">✓</span>
+                    </div>
+
+
+                    <div class="student">
+                        <div class="avatar gray">M</div>
+
+                        <div class="info">
+                            <p>Maria Santos</p>
+                            <span>maria@email.com</span>
+                        </div>
+                    </div>
+
+
+                    <div class="student">
+                        <div class="avatar gray">J</div>
+
+                        <div class="info">
+                            <p>Juan Dela Cruz</p>
+                            <span>juan@email.com</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- LAB & DATE -->
+
+            <div class="card">
+
+                <h2>2. Choose Lab & Date</h2>
+
+                <label>Laboratory</label>
+
+                <div class="labs">
+                    <button class="lab active">Gokongwei</button>
+                    <button class="lab">Andrew</button>
+                    <button class="lab">SJ</button>
+                </div>
+
+
+                <label>Date</label>
+
+                <div class="dates">
+
+                    <button class="date active">
+                        <span>Mon</span>
+                        <span>Feb 23</span>
+                    </button>
+
+                    <button class="date">
+                        <span>Tue</span>
+                        <span>Feb 24</span>
+                    </button>
+
+                    <button class="date">
+                        <span>Wed</span>
+                        <span>Feb 25</span>
+                    </button>
+
+                </div>
+
+
+
+                <label>Seat</label>
+
+                <div class="seats">
+
+                    <button class="seat selected">1</button>
+                    <button class="seat">2</button>
+                    <button class="seat">3</button>
+                    <button class="seat blocked">4</button>
+                    <button class="seat reserved">5</button>
+                    <button class="seat">6</button>
+                    <button class="seat">7</button>
+                    <button class="seat">8</button>
+
+                </div>
+
+
+
+                <label>Time Slots</label>
+
+                <div class="slots">
+
+                    <button class="slot selected">10:00</button>
+                    <button class="slot selected">10:30</button>
+                    <button class="slot">11:00</button>
+                    <button class="slot">11:30</button>
+                    <button class="slot reserved">12:00</button>
+                    <button class="slot">12:30</button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SUMMARY -->
+
+        <div class="summary card">
+
+            <h2>Reservation Summary</h2>
+
+            <div class="summary-grid">
+
+                <div>
+                    <p>Student</p>
+                    <b>Alex Cruz</b>
+                </div>
+
+                <div>
+                    <p>Laboratory</p>
+                    <b>Gokongwei</b>
+                </div>
+
+                <div>
+                    <p>Seat</p>
+                    <b>Seat 1</b>
+                </div>
+
+                <div>
+                    <p>Date</p>
+                    <b>Feb 23, 2026</b>
+                </div>
+
+            </div>
+
+
+            <div class="time-tags">
+
+                <span>10:00</span>
+                <span>10:30</span>
+
+            </div>
+
+
+            <button class="confirm-btn">
+                Confirm Reservation for Alex Cruz
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- MODAL -->
+
+    <div class="modal">
+
+        <div class="modal-content">
+
+            <h3>Confirm Reservation</h3>
+
+            <div class="student-modal">
+                <div class="avatar">A</div>
+
+                <div>
+                    <p>Alex Cruz</p>
+                    <span>alex@email.com</span>
+                </div>
+            </div>
+
+
+            <div class="modal-info">
+
+                <div>
+                    <span>Laboratory</span>
+                    <b>Gokongwei</b>
+                </div>
+
+                <div>
+                    <span>Seat</span>
+                    <b>Seat 1</b>
+                </div>
+
+                <div>
+                    <span>Date</span>
+                    <b>Monday, Feb 23</b>
+                </div>
+
+                <div>
+                    <span>Slots</span>
+                    <b>2 selected</b>
+                </div>
+
+            </div>
+
+
+            <div class="modal-buttons">
+
+                <button class="cancel">Cancel</button>
+                <button class="confirm">Confirm</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="/app.js?v=2"></script>
+</body>
+
+</html>
