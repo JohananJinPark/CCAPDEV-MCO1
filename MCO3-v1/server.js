@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const User = require('./models/User');
 const Reservation = require('./models/Reservation');
+const bcrypt = require('bcrypt');
 
 dotenv.config({ path: path.join(__dirname, 'port.env') });
 
@@ -79,20 +80,21 @@ app.get('/profile', requireLogin, (req, res) =>
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     try {
-        const user = await User.findOne({ email, password });
+        const user = await User.findOne({ email });
         if (user) {
-            // Save user info into the session
-            req.session.userId   = user._id.toString();
-            req.session.userName = user.name;
-            req.session.userRole = user.role;
-            req.session.userEmail = user.email;
-
-            if (user.role === 'technician') return res.redirect('/tech-dashboard');
-            return res.redirect('/student-dashboard');
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (isMatch) {
+                req.session.userId = user._id;
+                req.session.userRole = user.role;
+                if (user.role === 'technician') return res.redirect('/tech-dashboard');
+                else return res.redirect('/student-dashboard');
+            } else {
+                res.send("Invalid login. <a href='/login'>Try again</a>");
+            }
+        } else {
+            res.send("Invalid login. <a href='/login'>Try again</a>");
         }
-        res.send("Invalid login. <a href='/login'>Try again</a>");
     } catch (err) {
-        console.error(err);
         res.status(500).send("Internal Server Error");
     }
 });
@@ -102,10 +104,18 @@ app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
         const existingUser = await User.findOne({ email });
-        if (existingUser)
+        if (existingUser) {
             return res.status(400).json({ message: "Email is already registered." });
-
-        const newUser = new User({ name, email, password, role, avatarColor: '#006B3F' });
+        }
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const newUser = new User({
+            name,
+            email,
+            password: hashedPassword,
+            role,
+            avatarColor: '#006B3F'
+        });
         await newUser.save();
         res.status(200).json({ success: true, message: "Account created successfully!" });
     } catch (err) {
