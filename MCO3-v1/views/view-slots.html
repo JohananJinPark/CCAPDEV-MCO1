@@ -27,23 +27,15 @@
       <div class="filter">
         <label>Select Laboratory</label>
         <select>
-          <option>Gokongwei Lab – Gokongwei Hall</option>
-          <option>Andrew Lab – Andrew Building</option>
-          <option>Velasco Lab – Velasco Hall</option>
+          <option value="gokongwei">Gokongwei Lab – Gokongwei Hall</option>
+          <option value="andrew">Andrew Lab – Andrew Building</option>
+          <option value="velasco">Velasco Lab – Velasco Hall</option>
         </select>
       </div>
 
       <div class="filter">
         <label>Select Date</label>
-
-        <div class="dates">
-          <button class="date active">Mon<br>Feb 23</button>
-          <button class="date">Tue<br>Feb 24</button>
-          <button class="date">Wed<br>Feb 25</button>
-          <button class="date">Thu<br>Feb 26</button>
-          <button class="date">Fri<br>Feb 27</button>
-        </div>
-
+=        <div class="dates"></div>
       </div>
 
     </div>
@@ -59,7 +51,7 @@
         <p>Gokongwei Hall • 40 seats</p>
       </div>
 
-      <span class="updated">Updated 10:24 AM</span>
+      <span class="updated" id="updatedTime"></span>
 
     </div>
 
@@ -130,7 +122,7 @@
 
         <h3>Select a seat</h3>
 
-        <p>Click any available seat to see details.</p>
+        <p>Click any available seat to see time slots.</p>
 
         <div class="summary">
 
@@ -158,6 +150,18 @@
     </div>
 
   </div>
-  <script src="/app.js?v=2"></script></body>
+
+  <script src="/app.js?v=3"></script>
+
+  <script>
+    /* Set the "Updated" timestamp */
+    const updatedEl = document.getElementById('updatedTime');
+    if (updatedEl) {
+      const now = new Date();
+      updatedEl.textContent = 'Updated ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+  </script>
+
+</body>
 
 </html>
