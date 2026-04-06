@@ -5,6 +5,7 @@ dotenv.config({ path: path.join(__dirname, 'port.env') });
 console.log('Attempting to connect to:', process.env.MONGODB_URI);
 const User = require('./models/User');
 const Reservation = require('./models/Reservation');
+const bcrypt = require('bcryptjs');
 
 const seedUsers = [
     {
@@ -59,8 +60,12 @@ const seedDatabase = async () => {
         await Reservation.deleteMany({});
 
         // Insert Users
-        const createdUsers = await User.insertMany(seedUsers);
-        console.log('5 Users seeded successfully!');
+        const saltRounds = 10;
+        const hashedUsers = await Promise.all(seedUsers.map(async u => ({
+            ...u,
+            password: await bcrypt.hash(u.password, saltRounds)
+        })));
+        const createdUsers = await User.insertMany(hashedUsers);
 
         // Insert Reservations using the generated User IDs
         const reservations = [
