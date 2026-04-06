@@ -1,0 +1,24 @@
+{
+  "name": "animolabs",
+  "version": "1.0.0",
+  "description": "DLSU Lab Reservation System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "mongoose": "^8.5.3"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": ["reservation", "lab", "dlsu"],
+  "author": "",
+  "license": "MIT"
+}
