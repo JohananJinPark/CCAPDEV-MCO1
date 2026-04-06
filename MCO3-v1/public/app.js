@@ -33,9 +33,12 @@ const Utils = {
     formatSlots(slots) {
         if (!slots || slots.length === 0) return '—';
         const sorted = [...slots].sort();
-        return sorted[0] + ' – ' + sorted[sorted.length - 1];
+        // Add 30 minutes to the last slot to get the actual end time
+        const [h, m] = sorted[sorted.length - 1].split(':').map(Number);
+        const endDate = new Date(0, 0, 0, h, m + 30);
+        const endStr = String(endDate.getHours()).padStart(2, '0') + ':' + String(endDate.getMinutes()).padStart(2, '0');
+        return sorted[0] + ' – ' + endStr;
     },
-
     /* inline field validation helpers */
     setFieldError(inputEl, message) {
         inputEl.style.borderColor = '#dc2626';
@@ -379,6 +382,8 @@ const ViewSlotsPage = {
     selectedSlots: [],
     selectedLab: 'gokongwei',
     selectedDate: null,
+    reservationsCache: [],
+    currentUserId: null,
  
     ALL_SLOTS: [
         '08:00','08:30','09:00','09:30','10:00','10:30',
@@ -386,8 +391,7 @@ const ViewSlotsPage = {
         '14:00','14:30','15:00','15:30','16:00','16:30',
         '17:00','17:30','18:00','18:30'
     ],
- 
-    /* Returns YYYY-MM-DD for a date that is `offset` days from today (local time) */
+
     getDateString(offset = 0) {
         const d = new Date();
         d.setDate(d.getDate() + offset);
@@ -396,31 +400,28 @@ const ViewSlotsPage = {
         const dd   = String(d.getDate()).padStart(2, '0');
         return `${yyyy}-${mm}-${dd}`;
     },
- 
-    /* Returns current local time as "HH:MM" */
+
     getNowTime() {
         const n = new Date();
         return String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0');
     },
- 
-    /* Returns slots that are still in the future for a given date string */
+
     getFutureSlots(dateStr) {
         const today = this.getDateString(0);
-        if (dateStr !== today) return this.ALL_SLOTS; // future day → all slots open
+        if (dateStr !== today) return this.ALL_SLOTS;
         const now = this.getNowTime();
         return this.ALL_SLOTS.filter(t => t > now);
     },
- 
-    /* Build and inject the 7-day date button strip */
+
     buildDateButtons() {
         const container = document.querySelector('.dates');
         if (!container) return;
- 
+
         const DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
         const MON_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
- 
+
         container.innerHTML = '';
- 
+
         for (let i = 0; i < 7; i++) {
             const d       = new Date();
             d.setDate(d.getDate() + i);
@@ -428,106 +429,229 @@ const ViewSlotsPage = {
             const label   = i === 0 ? 'Today' : DAY_LABELS[d.getDay()];
             const dayNum  = d.getDate();
             const month   = MON_LABELS[d.getMonth()];
- 
+
             const btn = document.createElement('button');
-            btn.className  = 'date' + (i === 0 ? ' active' : '');
+            btn.className    = 'date' + (i === 0 ? ' active' : '');
             btn.dataset.date = dateStr;
-            btn.innerHTML  = `<span>${label}</span><span>${month} ${dayNum}</span>`;
- 
+            btn.innerHTML    = `<span>${label}</span><span>${month} ${dayNum}</span>`;
+
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.date').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this.selectedDate = dateStr;
-                /* If a seat was already selected, refresh the slot panel */
-                if (this.selectedSeat !== null) this.showSlotPanel();
+                this.selectedSeat = null;
+                this.selectedSlots = [];
+                this.updateSeatMap();
+                // Reset panel
+                const panel = document.querySelector('.seat-panel');
+                if (panel) panel.innerHTML = `<h3>Select a seat</h3><p>Click any seat to see time slots.</p>`;
             });
- 
+
             container.appendChild(btn);
         }
     },
- 
-    init() {
+
+    async init() {
         AuthUI.injectNavbar();
- 
-        /* Set today as default selected date */
+
+        // Get current user id for "mine" coloring
+        try {
+            const r = await fetch('/api/me');
+            if (r.ok) {
+                const u = await r.json();
+                this.currentUserId = u.userId;
+            }
+        } catch(e) {}
+
         this.selectedDate = this.getDateString(0);
- 
-        /* Dynamically build the date buttons */
         this.buildDateButtons();
- 
-        /* Lab selector */
+
         const labSelect = document.querySelector('select');
         if (labSelect) {
-            labSelect.addEventListener('change', function () {
-                ViewSlotsPage.selectedLab = this.value;
+            labSelect.addEventListener('change', () => {
+                this.selectedLab   = labSelect.value;
+                this.selectedSeat  = null;
+                this.selectedSlots = [];
+                this.loadReservations();
+                const panel = document.querySelector('.seat-panel');
+                if (panel) panel.innerHTML = `<h3>Select a seat</h3><p>Click any seat to see time slots.</p>`;
             });
         }
- 
-        /* Seat clicks */
-        document.querySelectorAll('.seat').forEach(seat => {
+
+        // ALL seats are always clickable — color and panel content handle state
+        document.querySelectorAll('.seats .seat').forEach(seat => {
             seat.addEventListener('click', function () {
-                if (this.classList.contains('reserved') || this.classList.contains('blocked')) return;
-                document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected-seat'));
+                if (this.classList.contains('blocked')) return;
+                document.querySelectorAll('.seats .seat').forEach(s => s.classList.remove('selected-seat'));
                 this.classList.add('selected-seat');
-                ViewSlotsPage.selectedSeat = parseInt(this.textContent);
+                ViewSlotsPage.selectedSeat   = parseInt(this.textContent);
+                ViewSlotsPage.selectedSlots  = [];
                 ViewSlotsPage.showSlotPanel();
             });
         });
+
+        // Load then auto-refresh every 60 s
+        await this.loadReservations();
+        setInterval(() => this.loadReservations(), 60000);
     },
- 
+
+    async loadReservations() {
+        try {
+            const res = await fetch('/api/reservations');
+            if (!res.ok) return;
+            this.reservationsCache = await res.json();
+            this.updateSeatMap();
+            // Refresh panel if a seat is selected
+            if (this.selectedSeat !== null) this.showSlotPanel();
+        } catch(e) {}
+    },
+
+    updateSeatMap() {
+        const recs = this.reservationsCache.filter(r =>
+            r.lab    === this.selectedLab &&
+            r.date   === this.selectedDate &&
+            r.status !== 'cancelled'
+        );
+
+        document.querySelectorAll('.seats .seat').forEach(seatEl => {
+            // Skip manually blocked seats
+            if (seatEl.dataset.blocked === 'true') return;
+
+            const seatNum = parseInt(seatEl.textContent);
+
+            // All reservations for this seat on this date
+            const seatRecs = recs.filter(r => r.seat === seatNum);
+
+            // Collect all booked slot strings for this seat
+            const bookedSlots = new Set();
+            let   hasMyRec    = false;
+
+            seatRecs.forEach(r => {
+                r.slots.forEach(s => bookedSlots.add(s));
+                if (r.userId && (r.userId._id || r.userId).toString() === this.currentUserId) {
+                    hasMyRec = true;
+                }
+            });
+
+            // Future slots (for today, only future ones count)
+            const futureSlots = this.getFutureSlots(this.selectedDate);
+
+            // A slot is "effectively available" if it's a future slot and not booked
+            const hasAvailableSlot = futureSlots.some(s => !bookedSlots.has(s));
+
+            // Remove all state classes first
+            seatEl.classList.remove('available', 'reserved', 'mine', 'selected-seat');
+
+            if (hasMyRec) {
+                seatEl.classList.add('mine');       // blue-you have a reservation on this seat
+            } else if (!hasAvailableSlot) {
+                seatEl.classList.add('reserved');   // red-fully booked
+            } else {
+                seatEl.classList.add('available');  // green-at least one slot free
+            }
+        });
+    },
+
     showSlotPanel() {
         const panel = document.querySelector('.seat-panel');
         if (!panel) return;
- 
+
         const futureSlots = this.getFutureSlots(this.selectedDate);
-        const allSlots    = this.ALL_SLOTS;
- 
-        /* If today and NO slots remain, show a message instead */
-        const isToday = this.selectedDate === this.getDateString(0);
+        const isToday     = this.selectedDate === this.getDateString(0);
+
+        // Reservations for this exact seat/lab/date
+        const seatRecs = this.reservationsCache.filter(r =>
+            r.lab    === this.selectedLab &&
+            r.seat   === this.selectedSeat &&
+            r.date   === this.selectedDate &&
+            r.status !== 'cancelled'
+        );
+
+        // Map slot → { name, userId } for taken slots
+        const takenSlots = {};
+        seatRecs.forEach(r => {
+            const name = r.anonymous ? 'Anonymous' : (r.userId?.name || 'Someone');
+            const uid  = r.anonymous ? null : (r.userId?._id || r.userId);
+            r.slots.forEach(s => { takenSlots[s] = { name, uid }; });
+        });
+
+        // Check if every future slot is taken — show info but no booking form
+        const allFutureTaken = futureSlots.length > 0 && futureSlots.every(s => takenSlots[s]);
+
         if (isToday && futureSlots.length === 0) {
             panel.innerHTML = `
-                <h3>Seat ${this.selectedSeat} Selected</h3>
+                <h3>Seat ${this.selectedSeat}</h3>
                 <p style="font-size:13px;color:#dc2626;margin:12px 0;
                            background:#fee2e2;padding:10px;border-radius:8px;">
-                    ⚠ No more available time slots for today.<br>
+                    No more available time slots for today.<br>
                     Please select a future date to book.
                 </p>`;
-            this.selectedSlots = [];
             return;
         }
- 
+
+        // Build slot buttons
+        const slotButtons = this.ALL_SLOTS.map(t => {
+            const isPast  = isToday && !futureSlots.includes(t);
+            const isTaken = !!takenSlots[t];
+            const isMySlot = isTaken && takenSlots[t].uid &&
+                             takenSlots[t].uid.toString() === this.currentUserId;
+            const disabled = isPast || isTaken;
+
+            let bg = 'white', border = '#ddd', color = 'inherit', cursor = 'pointer';
+            let subLabel = '';
+
+            if (isPast) {
+                bg = '#f5f5f5'; border = '#f0f0f0'; color = '#bbb'; cursor = 'not-allowed';
+                subLabel = `<br><span style="font-size:10px;">past</span>`;
+            } else if (isTaken) {
+                if (isMySlot) {
+                    bg = '#dbeafe'; border = '#93c5fd'; color = '#1e40af'; cursor = 'not-allowed';
+                    subLabel = `<br><span style="font-size:10px;">your booking</span>`;
+                } else {
+                    bg = '#fee2e2'; border = '#fecaca'; color = '#991b1b'; cursor = 'not-allowed';
+                    const info  = takenSlots[t];
+                    const label = info.uid
+                        ? `<a href="/profile?id=${info.uid}" style="color:#991b1b;font-weight:600;text-decoration:underline;">${info.name}</a>`
+                        : `<span style="color:#991b1b;font-weight:600;">${info.name}</span>`;
+                    subLabel = `<br><span style="font-size:10px;">by ${label}</span>`;
+                }
+            }
+
+            return `<button class="slot-btn" data-time="${t}" ${disabled ? 'disabled' : ''}
+                style="padding:7px 4px;border:1px solid ${border};border-radius:6px;font-size:11px;
+                       cursor:${cursor};background:${bg};color:${color};
+                       line-height:1.4;text-align:center;word-break:break-word;">
+                <strong>${t}</strong>${subLabel}
+            </button>`;
+        }).join('');
+
         panel.innerHTML = `
-            <h3>Seat ${this.selectedSeat} Selected</h3>
-            <p style="font-size:13px;color:#666;margin:8px 0;">Pick one or more time slots:</p>
-            ${isToday ? `<p style="font-size:11px;color:#d97706;margin-bottom:8px;">
-                ⏰ Past slots are unavailable for today.</p>` : ''}
-            <div class="slots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;">
-                ${allSlots.map(t => {
-                    const isPast = isToday && !futureSlots.includes(t);
-                    return `<button class="slot-btn" data-time="${t}" ${isPast ? 'disabled' : ''}
-                        style="padding:6px;border:1px solid ${isPast ? '#f0f0f0' : '#ddd'};
-                               border-radius:6px;font-size:12px;
-                               cursor:${isPast ? 'not-allowed' : 'pointer'};
-                               background:${isPast ? '#f5f5f5' : 'white'};
-                               color:${isPast ? '#bbb' : 'inherit'};">
-                        ${t}${isPast ? '<br><span style="font-size:10px;">past</span>' : ''}
-                    </button>`;
-                }).join('')}
+            <h3>Seat ${this.selectedSeat}</h3>
+            <p style="font-size:13px;color:#666;margin:6px 0 10px;">
+                ${allFutureTaken
+                    ? 'All slots are taken for this date.'
+                    : 'Select one or more available time slots:'}
+            </p>
+            ${isToday ? `<p style="font-size:11px;color:#d97706;margin-bottom:8px;">Past slots are unavailable.</p>` : ''}
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-bottom:12px;">
+                ${slotButtons}
             </div>
-            <div>
+            ${!allFutureTaken ? `
+            <div style="margin-bottom:8px;">
                 <label style="font-size:13px;color:#666;">
                     <input type="checkbox" id="anonCheck"> Book anonymously
                 </label>
             </div>
-            <p id="slotError" style="color:#dc2626;font-size:12px;margin-top:6px;display:none;">
+            <p id="slotError" style="color:#dc2626;font-size:12px;margin-top:4px;display:none;">
                 Please select at least one time slot.
             </p>
             <button id="confirmReservationBtn"
                 style="background:#006B3F;color:white;padding:10px;border:none;
-                       border-radius:8px;width:100%;margin-top:12px;cursor:pointer;font-size:14px;">
+                       border-radius:8px;width:100%;margin-top:8px;cursor:pointer;font-size:14px;">
                 Confirm Reservation
-            </button>`;
- 
+            </button>` : ''}`;
+
+        // Wire up slot toggles
         this.selectedSlots = [];
         panel.querySelectorAll('.slot-btn:not([disabled])').forEach(btn => {
             btn.addEventListener('click', function () {
@@ -537,7 +661,7 @@ const ViewSlotsPage = {
                     ViewSlotsPage.selectedSlots = ViewSlotsPage.selectedSlots.filter(s => s !== t);
                     this.style.background  = 'white';
                     this.style.borderColor = '#ddd';
-                    this.style.color       = 'black';
+                    this.style.color       = 'inherit';
                 } else {
                     ViewSlotsPage.selectedSlots.push(t);
                     this.style.background  = '#006B3F';
@@ -546,14 +670,12 @@ const ViewSlotsPage = {
                 }
             });
         });
- 
-        panel.querySelector('#confirmReservationBtn').addEventListener('click', () => {
-            this.submitReservation();
-        });
+
+        const confirmBtn = panel.querySelector('#confirmReservationBtn');
+        if (confirmBtn) confirmBtn.addEventListener('click', () => this.submitReservation());
     },
- 
+
     async submitReservation() {
-        /* Front-end validation */
         if (!this.selectedSeat) {
             Utils.toast('Please select a seat first.', 'error');
             return;
@@ -564,7 +686,7 @@ const ViewSlotsPage = {
             Utils.toast('Please select at least one time slot.', 'error');
             return;
         }
- 
+
         const body = {
             lab:       this.selectedLab,
             seat:      this.selectedSeat,
@@ -572,27 +694,27 @@ const ViewSlotsPage = {
             slots:     this.selectedSlots,
             anonymous: document.getElementById('anonCheck')?.checked || false
         };
- 
+
         try {
             const res  = await fetch('/api/reservations', {
-                method: 'POST',
+                method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
+                body:    JSON.stringify(body)
             });
             const data = await res.json();
             if (res.ok) {
-                Utils.toast('Reservation confirmed! ✔', 'success');
-                document.querySelectorAll('.seat').forEach(s => {
-                    if (parseInt(s.textContent) === this.selectedSeat) {
-                        s.classList.remove('available','selected-seat');
-                        s.classList.add('mine');
-                    }
-                });
+                Utils.toast('Reservation confirmed!', 'success');
+                // Reload reservations so seat map + panel update immediately
+                await this.loadReservations();
+                // Show booked confirmation in panel
                 const panel = document.querySelector('.seat-panel');
-                if (panel) panel.innerHTML = `<h3>Booked ✔</h3>
+                if (panel) panel.innerHTML = `
+                    <h3>Booked</h3>
                     <p style="color:#666;font-size:13px;margin-top:8px;">
                         Seat ${this.selectedSeat} reserved for ${Utils.formatSlots(this.selectedSlots)}.
-                        <br><a href="/my-reservations" style="color:#006B3F;">View My Reservations →</a>
+                        <br><a href="/my-reservations" style="color:#006B3F;margin-top:6px;display:inline-block;">
+                            View My Reservations →
+                        </a>
                     </p>`;
                 this.selectedSeat  = null;
                 this.selectedSlots = [];
@@ -603,7 +725,7 @@ const ViewSlotsPage = {
             Utils.toast('Server error. Please try again.', 'error');
         }
     },
- 
+
 };
 
 /* My Reservations */
@@ -622,7 +744,6 @@ const MyReservationsPage = {
             if (!res.ok) { Utils.toast('Could not load reservations.', 'error'); return; }
             const data = await res.json();
 
-            // Update summary counts
             const total     = data.length;
             const confirmed = data.filter(r => r.status === 'confirmed').length;
             const pending   = data.filter(r => r.status === 'pending').length;
@@ -666,14 +787,17 @@ const MyReservationsPage = {
                         <p class="booked">Booked on ${Utils.formatDate(r.bookedAt)}</p>
                     </div>
                     <div class="actions">
-                        ${r.status !== 'cancelled'
-                            ? `<button class="cancel" data-id="${r._id}">Cancel</button>`
-                            : `<button disabled style="color:#aaa;border-color:#eee;">Cancelled</button>`}
+                        ${r.status !== 'cancelled' ? `
+                            <button class="edit"   data-id="${r._id}">Edit</button>
+                            <button class="cancel" data-id="${r._id}">Cancel</button>
+                        ` : `
+                            <button disabled style="color:#aaa;border-color:#eee;">Cancelled</button>
+                        `}
                     </div>`;
                 listEl.appendChild(card);
             });
 
-            // Wire up cancel buttons
+            /* Cancel */
             listEl.querySelectorAll('.cancel').forEach(btn => {
                 btn.addEventListener('click', async function () {
                     if (!confirm('Are you sure you want to cancel this reservation?')) return;
@@ -683,15 +807,151 @@ const MyReservationsPage = {
                         Utils.toast('Reservation cancelled.', 'success');
                         MyReservationsPage.loadReservations();
                     } else {
-                        const data = await res.json();
-                        Utils.toast(data.message || 'Could not cancel.', 'error');
+                        const d = await res.json();
+                        Utils.toast(d.message || 'Could not cancel.', 'error');
                     }
+                });
+            });
+
+            /* Edit */
+            listEl.querySelectorAll('.edit').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const id = this.dataset.id;
+                    const reservation = data.find(r => r._id === id);
+                    if (reservation) MyReservationsPage.showEditModal(reservation);
                 });
             });
 
         } catch (err) {
             Utils.toast('Error loading reservations.', 'error');
         }
+    },
+
+    showEditModal(r) {
+        // Remove existing modal if any
+        document.getElementById('editReservationModal')?.remove();
+
+        const ALL_SLOTS = [
+            '08:00','08:30','09:00','09:30','10:00','10:30',
+            '11:00','11:30','12:00','12:30','13:00','13:30',
+            '14:00','14:30','15:00','15:30','16:00','16:30',
+            '17:00','17:30','18:00','18:30'
+        ];
+
+        const modal = document.createElement('div');
+        modal.id = 'editReservationModal';
+        modal.style.cssText = `
+            position:fixed;inset:0;background:rgba(0,0,0,0.5);
+            display:flex;align-items:center;justify-content:center;
+            z-index:9000;font-family:Inter,sans-serif;`;
+
+        modal.innerHTML = `
+            <div style="background:white;border-radius:16px;padding:28px;
+                        width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;
+                        box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h3 style="font-size:18px;font-weight:700;">Edit Reservation</h3>
+                    <button id="closeEditModal"
+                        style="background:none;border:none;font-size:20px;cursor:pointer;color:#666;">✕</button>
+                </div>
+
+                <div style="background:#f7f9f8;border-radius:10px;padding:12px;margin-bottom:18px;font-size:13px;color:#555;">
+                    <strong>${r.lab}</strong> — Seat ${r.seat} — ${Utils.formatDate(r.date)}
+                </div>
+
+                <label style="font-size:13px;font-weight:600;color:#444;display:block;margin-bottom:8px;">
+                    Time Slots <span style="font-weight:400;color:#888;">(select all that apply)</span>
+                </label>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;">
+                    ${ALL_SLOTS.map(t => {
+                        const selected = r.slots.includes(t);
+                        return `<button type="button" class="edit-slot-btn"
+                            data-time="${t}"
+                            data-selected="${selected}"
+                            style="padding:7px 4px;border-radius:6px;font-size:12px;cursor:pointer;
+                                   border:1px solid ${selected ? '#006B3F' : '#ddd'};
+                                   background:${selected ? '#006B3F' : 'white'};
+                                   color:${selected ? 'white' : 'inherit'};">
+                            ${t}
+                        </button>`;
+                    }).join('')}
+                </div>
+
+                <label style="font-size:13px;font-weight:600;color:#444;display:block;margin-bottom:8px;">
+                    Anonymous Booking
+                </label>
+                <div style="margin-bottom:20px;">
+                    <label style="font-size:13px;color:#666;">
+                        <input type="checkbox" id="editAnonCheck" ${r.anonymous ? 'checked' : ''}>
+                        Book anonymously
+                    </label>
+                </div>
+
+                <p id="editSlotError" style="color:#dc2626;font-size:12px;margin-bottom:8px;display:none;">
+                    Please select at least one time slot.
+                </p>
+
+                <div style="display:flex;gap:10px;">
+                    <button id="saveEditBtn"
+                        style="flex:1;background:#006B3F;color:white;border:none;
+                               padding:11px;border-radius:10px;font-size:14px;
+                               font-weight:600;cursor:pointer;">
+                        Save Changes
+                    </button>
+                    <button id="cancelEditModalBtn"
+                        style="flex:1;background:white;border:1px solid #ddd;
+                               padding:11px;border-radius:10px;font-size:14px;cursor:pointer;">
+                        Cancel
+                    </button>
+                </div>
+            </div>`;
+
+        document.body.appendChild(modal);
+
+        /* Slot toggles */
+        modal.querySelectorAll('.edit-slot-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const isSelected = this.dataset.selected === 'true';
+                this.dataset.selected = isSelected ? 'false' : 'true';
+                this.style.background  = isSelected ? 'white'   : '#006B3F';
+                this.style.borderColor = isSelected ? '#ddd'    : '#006B3F';
+                this.style.color       = isSelected ? 'inherit' : 'white';
+                document.getElementById('editSlotError').style.display = 'none';
+            });
+        });
+
+        /* Close */
+        modal.querySelector('#closeEditModal').addEventListener('click', () => modal.remove());
+        modal.querySelector('#cancelEditModalBtn').addEventListener('click', () => modal.remove());
+        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+        /* Save */
+        modal.querySelector('#saveEditBtn').addEventListener('click', async () => {
+            const newSlots = [...modal.querySelectorAll('.edit-slot-btn[data-selected="true"]')]
+                .map(b => b.dataset.time);
+
+            if (newSlots.length === 0) {
+                document.getElementById('editSlotError').style.display = 'block';
+                return;
+            }
+
+            const anonymous = document.getElementById('editAnonCheck').checked;
+
+            const res = await fetch(`/api/reservations/${r._id}/edit`, {
+                method:  'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ slots: newSlots, anonymous })
+            });
+
+            if (res.ok) {
+                Utils.toast('Reservation updated.', 'success');
+                modal.remove();
+                MyReservationsPage.loadReservations();
+            } else {
+                const d = await res.json();
+                Utils.toast(d.message || 'Could not update.', 'error');
+            }
+        });
     }
 };
 
@@ -919,27 +1179,230 @@ const ManageReservationsPage = {
 
 /* Search */
 const SearchPage = {
-    init() {
+    reservations: [],
+
+    ALL_SLOTS: [
+        '08:00','08:30','09:00','09:30','10:00','10:30',
+        '11:00','11:30','12:00','12:30','13:00','13:30',
+        '14:00','14:30','15:00','15:30','16:00','16:30',
+        '17:00','17:30','18:00','18:30'
+    ],
+
+    LABS: ['gokongwei', 'andrew', 'velasco'],
+
+    getDateString(offset = 0) {
+        const d = new Date();
+        d.setDate(d.getDate() + offset);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    },
+
+    formatDateLabel(dateStr) {
+        const d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    },
+
+    async init() {
         AuthUI.injectNavbar();
+        this.buildDateDropdown();
+        this.buildTimeDropdowns();
+
+        // Load all reservations once for filtering
+        try {
+            const res = await fetch('/api/reservations');
+            if (res.ok) this.reservations = await res.json();
+        } catch(e) {}
+
+        // Run a default search on load to show all available slots today
+        this.runSearch();
+
         const searchBtn = document.querySelector('.search-btn');
-        if (searchBtn) {
-            searchBtn.addEventListener('click', async () => {
-                const lab      = document.querySelectorAll('.field select')[0]?.value || '';
-                const date     = document.querySelectorAll('.field select')[1]?.value || '';
-                const fromTime = document.querySelectorAll('.field select')[2]?.value || '';
-                const toTime   = document.querySelectorAll('.field select')[3]?.value || '';
- 
-                /* Front-end validation */
-                if (fromTime && toTime && fromTime !== 'Any time' && toTime !== 'Any time') {
-                    if (fromTime >= toTime) {
-                        Utils.toast('"From Time" must be earlier than "Until Time".', 'error');
-                        return;
+        if (searchBtn) searchBtn.addEventListener('click', () => this.runSearch());
+    },
+
+    buildDateDropdown() {
+        const sel = document.querySelectorAll('.field select')[1];
+        if (!sel) return;
+        sel.innerHTML = '<option value="">Any date (next 7 days)</option>';
+        for (let i = 0; i < 7; i++) {
+            const dateStr = this.getDateString(i);
+            const label   = i === 0
+                ? `Today, ${this.formatDateLabel(dateStr)}`
+                : this.formatDateLabel(dateStr);
+            const opt = document.createElement('option');
+            opt.value       = dateStr;
+            opt.textContent = label;
+            sel.appendChild(opt);
+        }
+    },
+
+    buildTimeDropdowns() {
+        const fromSel = document.querySelectorAll('.field select')[2];
+        const toSel   = document.querySelectorAll('.field select')[3];
+        if (!fromSel || !toSel) return;
+
+        fromSel.innerHTML = '<option value="">Any time</option>';
+        toSel.innerHTML   = '<option value="">Any time</option>';
+
+        this.ALL_SLOTS.forEach(t => {
+            fromSel.innerHTML += `<option value="${t}">${t}</option>`;
+            toSel.innerHTML   += `<option value="${t}">${t}</option>`;
+        });
+    },
+
+    runSearch() {
+        const labSel    = document.querySelectorAll('.field select')[0];
+        const dateSel   = document.querySelectorAll('.field select')[1];
+        const fromSel   = document.querySelectorAll('.field select')[2];
+        const toSel     = document.querySelectorAll('.field select')[3];
+
+        const labFilter  = labSel?.value  || '';
+        const dateFilter = dateSel?.value || '';
+        const fromFilter = fromSel?.value || '';
+        const toFilter   = toSel?.value   || '';
+
+        // Validate time range
+        if (fromFilter && toFilter && fromFilter >= toFilter) {
+            Utils.toast('"From Time" must be earlier than "Until Time".', 'error');
+            return;
+        }
+
+        // Determine which dates to search
+        const dates = dateFilter
+            ? [dateFilter]
+            : Array.from({ length: 7 }, (_, i) => this.getDateString(i));
+
+        // Determine which labs to search
+        const labs = labFilter && labFilter !== 'All Labs'
+            ? [labFilter.toLowerCase()]
+            : this.LABS;
+
+        // Determine which slots fall within the time filter
+        const slotsInRange = this.ALL_SLOTS.filter(t => {
+            if (fromFilter && t < fromFilter) return false;
+            if (toFilter   && t >= toFilter)  return false;
+            return true;
+        });
+
+        if (slotsInRange.length === 0) {
+            this.renderResults([]);
+            return;
+        }
+
+        // Build results: for each date+lab, find seats with at least one free slot
+        const results = [];
+
+        dates.forEach(dateStr => {
+            labs.forEach(lab => {
+                // Reservations for this lab+date
+                const labRecs = this.reservations.filter(r =>
+                    r.lab === lab &&
+                    r.date === dateStr &&
+                    r.status !== 'cancelled'
+                );
+
+                // All booked slots per seat
+                const bookedBySeat = {};
+                labRecs.forEach(r => {
+                    if (!bookedBySeat[r.seat]) bookedBySeat[r.seat] = new Set();
+                    r.slots.forEach(s => bookedBySeat[r.seat].add(s));
+                });
+
+                // Seats 1–15 (adjust if your labs have different counts)
+                const seatCount = lab === 'gokongwei' ? 40 : lab === 'andrew' ? 30 : 25;
+                const freeSeats = [];
+
+                for (let seat = 1; seat <= seatCount; seat++) {
+                    const booked     = bookedBySeat[seat] || new Set();
+                    const freeSlots  = slotsInRange.filter(s => !booked.has(s));
+                    if (freeSlots.length > 0) {
+                        freeSeats.push({ seat, freeSlots });
                     }
                 }
- 
-                Utils.toast('Searching available slots…', 'success');
+
+                if (freeSeats.length > 0) {
+                    results.push({ dateStr, lab, freeSeats });
+                }
             });
+        });
+
+        this.renderResults(results);
+    },
+
+    renderResults(results) {
+        // Update count
+        const countEl = document.querySelector('.results-header p b');
+        const totalFreeSeats = results.reduce((sum, r) => sum + r.freeSeats.length, 0);
+        if (countEl) countEl.textContent = totalFreeSeats;
+
+        // Find or create results container
+        let container = document.getElementById('searchResultsContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'searchResultsContainer';
+            document.querySelector('.results-header')?.insertAdjacentElement('afterend', container);
         }
+        container.innerHTML = '';
+
+        if (results.length === 0) {
+            container.innerHTML = `
+                <div class="empty">
+                    <h3>No available slots found</h3>
+                    <p>Try adjusting your filters or choosing another date.</p>
+                </div>`;
+            return;
+        }
+
+        // Group by date
+        const byDate = {};
+        results.forEach(r => {
+            if (!byDate[r.dateStr]) byDate[r.dateStr] = [];
+            byDate[r.dateStr].push(r);
+        });
+
+        Object.entries(byDate).forEach(([dateStr, labGroups]) => {
+            const dateGroup = document.createElement('div');
+            dateGroup.className = 'date-group';
+            dateGroup.innerHTML = `<div class="date-label">${this.formatDateLabel(dateStr)}</div>`;
+
+            labGroups.forEach(({ lab, freeSeats }) => {
+                const labCard = document.createElement('div');
+                labCard.className = 'lab-card';
+                labCard.style.marginBottom = '14px';
+
+                const labName = lab.charAt(0).toUpperCase() + lab.slice(1) + ' Lab';
+                labCard.innerHTML = `
+                    <div class="lab-header">
+                        <div><b>${labName}</b></div>
+                        <div class="available">${freeSeats.length} seat${freeSeats.length !== 1 ? 's' : ''} available</div>
+                    </div>
+                    <div class="seats">
+                        ${freeSeats.map(({ seat, freeSlots }) => `
+                            <div class="seat-result">
+                                <div class="seat-num">${seat}</div>
+                                <div class="seat-info">
+                                    <p>Seat ${seat}</p>
+                                    <span>${freeSlots.length} slot${freeSlots.length !== 1 ? 's' : ''} free
+                                        (${freeSlots[0]}–${(() => {
+                                            const last = freeSlots[freeSlots.length - 1];
+                                            const [h, m] = last.split(':').map(Number);
+                                            const end = new Date(0,0,0,h,m+30);
+                                            return String(end.getHours()).padStart(2,'0') + ':' + String(end.getMinutes()).padStart(2,'0');
+                                        })()})
+                                    </span>
+                                </div>
+                                <button class="reserve"
+                                    onclick="window.location='/view-slots'"
+                                    title="Go to booking page">
+                                    Reserve →
+                                </button>
+                            </div>`).join('')}
+                    </div>`;
+
+                dateGroup.appendChild(labCard);
+            });
+
+            container.appendChild(dateGroup);
+        });
     }
 };
  
@@ -1079,6 +1542,294 @@ const ProfilePage = {
     }
 };
 
+/* Reserve for Student (Tech) */
+const ReserveStudentPage = {
+    selectedStudent: null,
+    selectedLab:     'gokongwei',
+    selectedDate:    null,
+    selectedSeat:    null,
+    selectedSlots:   [],
+
+    ALL_SLOTS: [
+        '08:00','08:30','09:00','09:30','10:00','10:30',
+        '11:00','11:30','12:00','12:30','13:00','13:30',
+        '14:00','14:30','15:00','15:30','16:00','16:30',
+        '17:00','17:30','18:00','18:30'
+    ],
+
+    getDateString(offset = 0) {
+        const d = new Date();
+        d.setDate(d.getDate() + offset);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    },
+
+    async init() {
+        await AuthUI.injectNavbar();
+        this.selectedDate = this.getDateString(0);
+
+        await this.loadStudents();
+        this.buildDateButtons();
+        this.bindLabButtons();
+        this.bindSeatButtons();
+        this.bindSlotButtons();
+        this.bindConfirm();
+
+        // Hide static success banner
+        const banner = document.querySelector('.success');
+        if (banner) banner.style.display = 'none';
+
+        // Hide modal on load
+        const modal = document.querySelector('.modal');
+        if (modal) modal.style.display = 'none';
+    },
+
+    async loadStudents() {
+        try {
+            const res  = await fetch('/api/students');
+            if (!res.ok) return;
+            const students = await res.json();
+
+            const listEl = document.querySelector('.student-list');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+
+            students.forEach(s => {
+                const div = document.createElement('div');
+                div.className  = 'student';
+                div.dataset.id = s._id;
+                div.innerHTML  = `
+                    <div class="avatar" style="background:${s.avatarColor || '#006B3F'};">
+                        ${s.name[0].toUpperCase()}
+                    </div>
+                    <div class="info">
+                        <p>${s.name}</p>
+                        <span>${s.email}</span>
+                    </div>
+                    <span class="check" style="display:none;">✓</span>`;
+
+                div.addEventListener('click', () => {
+                    document.querySelectorAll('.student-list .student').forEach(el => {
+                        el.classList.remove('selected');
+                        el.querySelector('.check').style.display = 'none';
+                    });
+                    div.classList.add('selected');
+                    div.querySelector('.check').style.display = 'block';
+                    this.selectedStudent = { id: s._id, name: s.name, email: s.email };
+                    this.updateSummary();
+                });
+
+                listEl.appendChild(div);
+            });
+
+            /* Wire up student search */
+            const searchInput = document.querySelector('.search input');
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    const q = searchInput.value.toLowerCase();
+                    listEl.querySelectorAll('.student').forEach(el => {
+                        const text = el.textContent.toLowerCase();
+                        el.style.display = text.includes(q) ? '' : 'none';
+                    });
+                });
+            }
+        } catch(e) {
+            console.log('Could not load students:', e);
+        }
+    },
+
+    buildDateButtons() {
+        const container = document.querySelector('.dates');
+        if (!container) return;
+
+        const DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const MON_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        container.innerHTML = '';
+
+        for (let i = 0; i < 7; i++) {
+            const d       = new Date();
+            d.setDate(d.getDate() + i);
+            const dateStr = this.getDateString(i);
+            const label   = i === 0 ? 'Today' : DAY_LABELS[d.getDay()];
+
+            const btn = document.createElement('button');
+            btn.className    = 'date' + (i === 0 ? ' active' : '');
+            btn.dataset.date = dateStr;
+            btn.innerHTML    = `<span>${label}</span><span>${MON_LABELS[d.getMonth()]} ${d.getDate()}</span>`;
+
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.dates .date').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.selectedDate  = dateStr;
+                this.selectedSeat  = null;
+                this.selectedSlots = [];
+                this.updateSummary();
+            });
+
+            container.appendChild(btn);
+        }
+    },
+
+    bindLabButtons() {
+        document.querySelectorAll('.labs .lab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.labs .lab').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.selectedLab   = btn.textContent.trim().toLowerCase();
+                this.selectedSeat  = null;
+                this.selectedSlots = [];
+                this.updateSummary();
+            });
+        });
+    },
+
+    bindSeatButtons() {
+        document.querySelectorAll('.seats .seat').forEach(btn => {
+            btn.addEventListener('click', function () {
+                if (this.classList.contains('blocked') || this.classList.contains('reserved')) return;
+                document.querySelectorAll('.seats .seat').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                ReserveStudentPage.selectedSeat  = parseInt(this.textContent);
+                ReserveStudentPage.selectedSlots = [];
+                // Deselect all slot buttons
+                document.querySelectorAll('.slots .slot').forEach(s => {
+                    s.classList.remove('selected');
+                });
+                ReserveStudentPage.updateSummary();
+            });
+        });
+    },
+
+    bindSlotButtons() {
+        document.querySelectorAll('.slots .slot').forEach(btn => {
+            btn.addEventListener('click', function () {
+                if (this.classList.contains('reserved')) return;
+                const t = this.textContent.trim();
+                if (ReserveStudentPage.selectedSlots.includes(t)) {
+                    ReserveStudentPage.selectedSlots = ReserveStudentPage.selectedSlots.filter(s => s !== t);
+                    this.classList.remove('selected');
+                } else {
+                    ReserveStudentPage.selectedSlots.push(t);
+                    this.classList.add('selected');
+                }
+                ReserveStudentPage.updateSummary();
+            });
+        });
+    },
+
+    bindConfirm() {
+        /* Summary confirm button */
+        const confirmBtn = document.querySelector('.confirm-btn');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => this.showConfirmModal());
+        }
+
+        /* Modal buttons */
+        const modalConfirm = document.querySelector('.modal .confirm');
+        if (modalConfirm) {
+            modalConfirm.addEventListener('click', () => this.submitReservation());
+        }
+
+        const modalCancel = document.querySelector('.modal .cancel');
+        if (modalCancel) {
+            modalCancel.addEventListener('click', () => {
+                const modal = document.querySelector('.modal');
+                if (modal) modal.style.display = 'none';
+            });
+        }
+    },
+
+    updateSummary() {
+        /* Summary grid values */
+        const cells = document.querySelectorAll('.summary-grid > div > b');
+        if (cells[0]) cells[0].textContent = this.selectedStudent?.name || '—';
+        if (cells[1]) cells[1].textContent = this.selectedLab            || '—';
+        if (cells[2]) cells[2].textContent = this.selectedSeat ? `Seat ${this.selectedSeat}` : '—';
+        if (cells[3]) cells[3].textContent = this.selectedDate ? Utils.formatDate(this.selectedDate) : '—';
+
+        /* Time tags */
+        const tagsEl = document.querySelector('.time-tags');
+        if (tagsEl) {
+            tagsEl.innerHTML = this.selectedSlots.length
+                ? this.selectedSlots.map(t => `<span>${t}</span>`).join('')
+                : '<span style="color:#aaa;background:#f5f5f5;">No slots selected</span>';
+        }
+
+        /* Confirm button label */
+        const confirmBtn = document.querySelector('.confirm-btn');
+        if (confirmBtn) {
+            confirmBtn.textContent = this.selectedStudent
+                ? `Confirm Reservation for ${this.selectedStudent.name}`
+                : 'Confirm Reservation';
+        }
+    },
+
+    showConfirmModal() {
+        /* Validate */
+        if (!this.selectedStudent) { Utils.toast('Please select a student.', 'error'); return; }
+        if (!this.selectedSeat)    { Utils.toast('Please select a seat.', 'error');    return; }
+        if (this.selectedSlots.length === 0) { Utils.toast('Please select at least one time slot.', 'error'); return; }
+
+        const modal = document.querySelector('.modal');
+        if (!modal) return;
+
+        /* Populate modal */
+        const avatarEl = modal.querySelector('.student-modal .avatar');
+        if (avatarEl) avatarEl.textContent = this.selectedStudent.name[0].toUpperCase();
+
+        const nameEl  = modal.querySelector('.student-modal p');
+        const emailEl = modal.querySelector('.student-modal span');
+        if (nameEl)  nameEl.textContent  = this.selectedStudent.name;
+        if (emailEl) emailEl.textContent = this.selectedStudent.email;
+
+        const infoDivs = modal.querySelectorAll('.modal-info div b');
+        if (infoDivs[0]) infoDivs[0].textContent = this.selectedLab;
+        if (infoDivs[1]) infoDivs[1].textContent = `Seat ${this.selectedSeat}`;
+        if (infoDivs[2]) infoDivs[2].textContent = Utils.formatDate(this.selectedDate);
+        if (infoDivs[3]) infoDivs[3].textContent = `${this.selectedSlots.length} slot(s): ${this.selectedSlots.join(', ')}`;
+
+        modal.style.display = 'flex';
+    },
+
+    async submitReservation() {
+        try {
+            const res = await fetch('/api/reservations/for-student', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({
+                    studentId: this.selectedStudent.id,
+                    lab:       this.selectedLab,
+                    seat:      this.selectedSeat,
+                    date:      this.selectedDate,
+                    slots:     this.selectedSlots,
+                    anonymous: false
+                })
+            });
+            const data = await res.json();
+
+            const modal = document.querySelector('.modal');
+            if (modal) modal.style.display = 'none';
+
+            if (res.ok) {
+                Utils.toast(`Reservation created for ${this.selectedStudent.name}!`, 'success');
+                const banner = document.querySelector('.success');
+                if (banner) {
+                    banner.textContent = `Reservation created for ${this.selectedStudent.name} — Seat ${this.selectedSeat} on ${Utils.formatDate(this.selectedDate)}.`;
+                    banner.style.display = 'block';
+                }
+                // Reset
+                this.selectedStudent = null;
+                this.selectedSeat    = null;
+                this.selectedSlots   = [];
+                this.updateSummary();
+            } else {
+                Utils.toast(data.message || 'Could not create reservation.', 'error');
+            }
+        } catch(e) {
+            Utils.toast('Server error. Please try again.', 'error');
+        }
+    }
+};
+
 /* 4. ROUTER */
 document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
@@ -1092,6 +1843,6 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (path.includes('all-reservations'))     AllReservationsPage.init();
     else if (path.includes('manage-reservations'))  ManageReservationsPage.init();
     else if (path.includes('search'))               SearchPage.init();
-    else if (path.includes('reserve-student'))      AuthUI.injectNavbar();
+    else if (path.includes('reserve-student'))      ReserveStudentPage.init();
     else if (path.includes('profile'))              ProfilePage.init();
 });
