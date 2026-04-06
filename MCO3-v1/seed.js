@@ -5,7 +5,7 @@ dotenv.config({ path: path.join(__dirname, 'port.env') });
 console.log('Attempting to connect to:', process.env.MONGODB_URI);
 const User = require('./models/User');
 const Reservation = require('./models/Reservation');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 
 const seedUsers = [
     {
