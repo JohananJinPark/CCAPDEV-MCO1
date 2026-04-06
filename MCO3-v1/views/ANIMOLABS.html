@@ -192,7 +192,42 @@
             </div>
         </section>
     </main>
-    <script src="/app.js?v=2"></script></body>
+    <script src="/app.js?v=2"></script>
+
+    <script>
+    async function loadLandingStats() {
+        try {
+            const res   = await fetch('/api/lab-stats');
+            if (!res.ok) return;
+            const stats = await res.json();
+
+            /* Update lab cards */
+            const labCards = document.querySelectorAll('.lab-card');
+            stats.forEach((s, i) => {
+                if (!labCards[i]) return;
+                const badge    = labCards[i].querySelector('.available');
+                const spanText = labCards[i].querySelector('.availability-text span');
+                const bar      = labCards[i].querySelector('.progress');
+
+                if (badge)    badge.textContent    = `${s.available} available`;
+                if (spanText) spanText.textContent = `${s.available} / ${s.total} seats available`;
+                if (bar)      bar.style.width      = Math.round((s.occupied / s.total) * 100) + '%';
+            });
+
+            /* Update hero grid */
+            const itemTops = document.querySelectorAll('.itemTop');
+            if (itemTops[1]) {
+                const totalSeats = stats.reduce((sum, s) => sum + s.total, 0);
+                itemTops[1].textContent = totalSeats;
+            }
+        } catch(e) {}
+    }
+
+    loadLandingStats();
+    setInterval(loadLandingStats, 60000);
+    </script>
+
+</body>
 
 <footer>
     <div class="footer-bottom">

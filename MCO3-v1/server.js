@@ -696,6 +696,36 @@ app.get('/api/students', requireLoginAPI, async (req, res) => {
     }
 });
 
+// GET public lab stats (no login required)
+app.get('/api/lab-stats', async (req, res) => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const recs  = await Reservation.find({ date: today, status: { $ne: 'cancelled' } });
+
+        const LABS = [
+            { key: 'gokongwei', total: 40 },
+            { key: 'andrew',    total: 30 },
+            { key: 'velasco',   total: 25 }
+        ];
+
+        const stats = LABS.map(lab => {
+            const bookedSeats = new Set(
+                recs.filter(r => r.lab === lab.key).map(r => r.seat)
+            );
+            return {
+                lab:       lab.key,
+                total:     lab.total,
+                available: lab.total - bookedSeats.size,
+                occupied:  bookedSeats.size
+            };
+        });
+
+        res.json(stats);
+    } catch(err) {
+        res.status(500).json({ message: 'Error fetching lab stats.' });
+    }
+});
+
 // START SERVER
 
 const PORT = process.env.PORT || 3000;

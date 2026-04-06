@@ -324,37 +324,79 @@ const StudentDashboard = {
     async init() {
         await AuthUI.injectNavbar();
         const dateEl = document.getElementById('dashDate');
-        if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+        if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US',
+            { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+        await this.loadData();
+        setInterval(() => this.loadData(), 60000);
+    },
+
+    async loadData() {
         try {
-            const res  = await fetch('/api/my-reservations');
-            if (!res.ok) return;
-            const data = await res.json();
+            const [myRes, allRes] = await Promise.all([
+                fetch('/api/my-reservations'),
+                fetch('/api/reservations')
+            ]);
 
-            // Update stat count
-            const upcoming = data.filter(r => r.status !== 'cancelled');
-            const el = document.querySelector('.stat-card h2');
-            if (el) el.textContent = upcoming.length;
+            /* --- Upcoming reservations stat + list --- */
+            if (myRes.ok) {
+                const myData = await myRes.json();
+                const upcoming = myData.filter(r => r.status !== 'cancelled');
+                const el = document.querySelector('.stat-card h2');
+                if (el) el.textContent = upcoming.length;
 
-            // Populate upcoming reservation list
-            const listEl = document.querySelector('.card .reservation:first-of-type')?.parentElement;
-            if (listEl && data.length > 0) {
-                // Remove static placeholder rows
-                listEl.querySelectorAll('.reservation').forEach(el => el.remove());
-                data.slice(0, 3).forEach(r => {
-                    const div = document.createElement('div');
-                    div.className = 'reservation';
-                    div.innerHTML = `
-                        <div class="seat">${r.seat}</div>
-                        <div>
-                            <h4>${r.lab} – Seat ${r.seat}</h4>
-                            <p>${Utils.formatDate(r.date)} • ${Utils.formatSlots(r.slots)}</p>
-                        </div>
-                        <span class="status ${r.status}">${r.status}</span>`;
-                    listEl.appendChild(div);
+                const listEl = document.querySelector('.card .reservation:first-of-type')?.parentElement;
+                if (listEl) {
+                    listEl.querySelectorAll('.reservation').forEach(el => el.remove());
+                    const toShow = myData.filter(r => r.status !== 'cancelled').slice(0, 3);
+                    if (toShow.length === 0) {
+                        const p = document.createElement('p');
+                        p.style.cssText = 'color:#999;font-size:14px;margin-top:12px;';
+                        p.textContent = 'No upcoming reservations.';
+                        listEl.appendChild(p);
+                    } else {
+                        toShow.forEach(r => {
+                            const div = document.createElement('div');
+                            div.className = 'reservation';
+                            div.innerHTML = `
+                                <div class="seat">${r.seat}</div>
+                                <div>
+                                    <h4>${r.lab} – Seat ${r.seat}</h4>
+                                    <p>${Utils.formatDate(r.date)} • ${Utils.formatSlots(r.slots)}</p>
+                                </div>
+                                <span class="status ${r.status}">${r.status}</span>`;
+                            listEl.appendChild(div);
+                        });
+                    }
+                }
+            }
+
+            /* --- Available labs --- */
+            if (allRes.ok) {
+                const allData  = await allRes.json();
+                const today    = new Date().toISOString().split('T')[0];
+                const LABS     = [
+                    { key: 'gokongwei', total: 40 },
+                    { key: 'andrew',    total: 30 },
+                    { key: 'velasco',   total: 25 }
+                ];
+
+                const labEls = document.querySelectorAll('.card .lab');
+                LABS.forEach((lab, i) => {
+                    if (!labEls[i]) return;
+                    /* Count seats that have at least one active reservation today */
+                    const bookedSeats = new Set(
+                        allData
+                            .filter(r => r.lab === lab.key && r.date === today && r.status !== 'cancelled')
+                            .map(r => r.seat)
+                    );
+                    const available = lab.total - bookedSeats.size;
+                    const p = labEls[i].querySelector('p');
+                    if (p) p.textContent = `${available} / ${lab.total} seats available`;
                 });
             }
         } catch (err) {
-            console.log('Could not load reservations:', err);
+            console.log('Could not load dashboard data:', err);
         }
     }
 };
@@ -364,20 +406,60 @@ const TechDashboard = {
     async init() {
         await AuthUI.injectNavbar();
         const dateEl = document.getElementById('dashDate');
-        if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+        if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US',
+            { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+        await this.loadData();
+        setInterval(() => this.loadData(), 60000);
+    },
+
+    async loadData() {
         try {
             const res  = await fetch('/api/reservations');
             if (!res.ok) return;
             const data = await res.json();
 
+            /* Stat cards */
             const confirmed = data.filter(r => r.status === 'confirmed').length;
             const pending   = data.filter(r => r.status === 'pending').length;
             const cards     = document.querySelectorAll('.stat-card h2');
             if (cards[0]) cards[0].textContent = confirmed;
             if (cards[1]) cards[1].textContent = pending;
             if (cards[2]) cards[2].textContent = data.length;
+
+            /* Lab status bars */
+            const today = new Date().toISOString().split('T')[0];
+            const LABS  = [
+                { key: 'gokongwei', total: 40 },
+                { key: 'andrew',    total: 30 },
+                { key: 'velasco',   total: 25 }
+            ];
+
+            const labEls = document.querySelectorAll('.lab');
+            LABS.forEach((lab, i) => {
+                if (!labEls[i]) return;
+                const bookedSeats = new Set(
+                    data.filter(r => r.lab === lab.key && r.date === today && r.status !== 'cancelled')
+                        .map(r => r.seat)
+                );
+                const occupied = bookedSeats.size;
+                const pct      = Math.round((occupied / lab.total) * 100);
+
+                const header = labEls[i].querySelector('.lab-header');
+                if (header) {
+                    const spans = header.querySelectorAll('span');
+                    if (spans[1]) spans[1].textContent = `${occupied}/${lab.total}`;
+                }
+
+                const bar = labEls[i].querySelector('.progress-fill');
+                if (bar) bar.style.width = pct + '%';
+
+                const pEl = labEls[i].querySelector('p');
+                if (pEl) pEl.textContent = `${pct}% occupied`;
+            });
+
         } catch (err) {
-            console.log('Could not load tech stats:', err);
+            console.log('Could not load tech dashboard data:', err);
         }
     }
 };
@@ -507,6 +589,7 @@ const ViewSlotsPage = {
             if (!res.ok) return;
             this.reservationsCache = await res.json();
             this.updateSeatMap();
+            this.updateSummaryPanel();
             // Refresh panel if a seat is selected
             if (this.selectedSeat !== null) this.showSlotPanel();
         } catch(e) {}
@@ -556,6 +639,27 @@ const ViewSlotsPage = {
                 seatEl.classList.add('available');  // green-at least one slot free
             }
         });
+    },
+
+    updateSummaryPanel() {
+        const today    = this.selectedDate;
+        const recs     = this.reservationsCache.filter(r =>
+            r.lab === this.selectedLab && r.date === today && r.status !== 'cancelled'
+        );
+
+        const LAB_TOTALS = { gokongwei: 40, andrew: 30, velasco: 25 };
+        const total      = LAB_TOTALS[this.selectedLab] || 15;
+
+        const bookedSeats  = new Set(recs.map(r => r.seat));
+        const reservedCount = bookedSeats.size;
+        const availableCount = total - reservedCount;
+
+        const items = document.querySelectorAll('.summary-item span:last-child');
+        if (items[0]) items[0].textContent = availableCount;
+        if (items[1]) items[1].textContent = reservedCount;
+        // Blocked stays static (data-blocked seats)
+        const blockedCount = document.querySelectorAll('.seats .seat[data-blocked="true"]').length;
+        if (items[2]) items[2].textContent = blockedCount;
     },
 
     showSlotPanel() {
