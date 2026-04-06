@@ -7,12 +7,13 @@
 
 body{
     background:#f7f9f8;
-    padding:40px;
+    padding:0;
 }
 
 .container{
     max-width:1100px;
     margin:auto;
+    padding:40px;
 }
 
 /* HEADER */
