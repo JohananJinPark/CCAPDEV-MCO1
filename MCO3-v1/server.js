@@ -252,6 +252,9 @@ app.get('/login', (req, res) =>
 app.get('/register', (req, res) =>
     res.sendFile(path.join(__dirname, 'views', 'register.html')));
 
+app.get('/register-tech', (req, res) =>
+    res.sendFile(path.join(__dirname, 'views', 'register-tech.html')));
+
 app.get('/student-dashboard', requireLogin, (req, res) =>
     res.sendFile(path.join(__dirname, 'views', 'student-dashboard.html')));
 
@@ -504,6 +507,100 @@ app.post('/api/reservations', requireLoginAPI, async (req, res) => {
     } catch (err) {
         console.error('Reservation error:', err);
         res.status(500).json({ message: 'Error creating reservation.' });
+    }
+});
+
+
+// POST reservation on behalf of a student (technician only)
+app.post('/api/reservations/for-student', requireLoginAPI, async (req, res) => {
+    if (req.session.userRole !== 'technician') {
+        return res.status(403).json({ message: 'Only technicians can reserve for students.' });
+    }
+
+    const { studentId, lab, seat, date, slots, anonymous } = req.body;
+
+    if (!studentId || !mongoose.Types.ObjectId.isValid(studentId)) {
+        return res.status(400).json({ message: 'Valid student ID is required.' });
+    }
+
+    try {
+        const student = await User.findById(studentId);
+        if (!student || student.role !== 'student') {
+            return res.status(404).json({ message: 'Student not found.' });
+        }
+
+        const errors = validateReservationPayload({ lab, seat, date, slots });
+        if (errors.length > 0) return res.status(400).json({ message: errors[0], errors });
+
+        const existing = await Reservation.findOne({
+            lab: lab.trim().toLowerCase(), seat: Number(seat), date: date.trim(),
+            status: { $ne: 'cancelled' }, slots: { $in: slots }
+        });
+        if (existing) return res.status(409).json({ message: 'That seat and time slot are already reserved.' });
+
+        const newRes = new Reservation({
+            userId:    studentId,
+            lab:       lab.trim().toLowerCase(),
+            seat:      Number(seat),
+            date:      date.trim(),
+            slots,
+            status:    'confirmed',
+            anonymous: Boolean(anonymous),
+            note:      'Reserved by technician'
+        });
+        await newRes.save();
+        res.status(201).json({ success: true, reservation: newRes });
+    } catch (err) {
+        console.error('for-student error:', err);
+        res.status(500).json({ message: 'Error creating reservation.' });
+    }
+});
+
+// PATCH edit slots/anonymous on a reservation (owner or technician)
+// NOTE: this must be defined BEFORE the generic PATCH /api/reservations/:id route
+app.patch('/api/reservations/:id/edit', requireLoginAPI, async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ message: 'Invalid reservation ID.' });
+    }
+
+    const { slots, anonymous } = req.body;
+
+    if (!slots || !Array.isArray(slots) || slots.length === 0) {
+        return res.status(400).json({ message: 'At least one time slot is required.' });
+    }
+    const invalid = slots.filter(s => !VALID_SLOTS.includes(s));
+    if (invalid.length > 0) {
+        return res.status(400).json({ message: `Invalid slot(s): ${invalid.join(', ')}` });
+    }
+
+    try {
+        const reservation = await Reservation.findById(req.params.id);
+        if (!reservation) return res.status(404).json({ message: 'Reservation not found.' });
+
+        const isTech  = req.session.userRole === 'technician';
+        const isOwner = reservation.userId.toString() === req.session.userId.toString();
+        if (!isTech && !isOwner) {
+            return res.status(403).json({ message: 'Not authorised to edit this reservation.' });
+        }
+
+        const conflict = await Reservation.findOne({
+            _id:    { $ne: reservation._id },
+            lab:    reservation.lab,
+            seat:   reservation.seat,
+            date:   reservation.date,
+            status: { $ne: 'cancelled' },
+            slots:  { $in: slots }
+        });
+        if (conflict) {
+            return res.status(409).json({ message: 'One or more selected slots are already taken.' });
+        }
+
+        reservation.slots = slots;
+        if (anonymous !== undefined) reservation.anonymous = Boolean(anonymous);
+        await reservation.save();
+        res.json({ success: true, reservation });
+    } catch (err) {
+        res.status(500).json({ message: 'Error updating reservation.' });
     }
 });
 
