@@ -365,9 +365,23 @@ app.get('/api/logout', (req, res) => {
 });
 
 // Current session user info
-app.get('/api/me', (req, res) => {
+app.get('/api/me', async (req, res) => {
     if (!req.session.userId)
         return res.status(401).json({ message: 'Not logged in' });
+
+    // If session is missing name (e.g. old session), fetch from DB
+    if (!req.session.userName) {
+        try {
+            const user = await User.findById(req.session.userId).select('name email role');
+            if (!user) return res.status(401).json({ message: 'User not found.' });
+            req.session.userName  = user.name;
+            req.session.userEmail = user.email;
+            req.session.userRole  = user.role;
+        } catch(err) {
+            return res.status(500).json({ message: 'Session error.' });
+        }
+    }
+
     res.json({
         userId: req.session.userId,
         name:   req.session.userName,
@@ -385,6 +399,20 @@ app.get('/api/profile', requireLoginAPI, async (req, res) => {
         if (!user) return res.status(404).json({ message: 'User not found.' });
         res.json(user);
     } catch (err) {
+        res.status(500).json({ message: 'Error fetching profile.' });
+    }
+});
+
+// GET any user's public profile (by ID)
+app.get('/api/profile/:id', requireLoginAPI, async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ message: 'Invalid user ID.' });
+    }
+    try {
+        const user = await User.findById(req.params.id).select('name email role bio avatarColor');
+        if (!user) return res.status(404).json({ message: 'User not found.' });
+        res.json(user);
+    } catch(err) {
         res.status(500).json({ message: 'Error fetching profile.' });
     }
 });

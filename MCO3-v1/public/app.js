@@ -107,12 +107,14 @@ const AuthUI = {
                         <a href="/manage-reservations"  style="color:white; text-decoration:none;">Manage</a>
                         <a href="/all-reservations"     style="color:white; text-decoration:none;">All Reservations</a>
                         <a href="/about"                style="color:white;text-decoration:none;">About</a>
+                        <a href="/profile"              style="color:white;text-decoration:none;">Profile</a>
                     ` : `
                         <a href="/student-dashboard"    style="color:white; text-decoration:none;">Dashboard</a>
                         <a href="/view-slots"           style="color:white; text-decoration:none;">Book a Seat</a>
                         <a href="/my-reservations"      style="color:white; text-decoration:none;">My Reservations</a>
                         <a href="/search"               style="color:white; text-decoration:none;">Search Slots</a>
                         <a href="/about"                style="color:white;text-decoration:none;">About</a>
+                        <a href="/profile"              style="color:white;text-decoration:none;">Profile</a>
                     `}
                     <span style="color:#d1fae5; font-size:13px;">Hi, ${user.name.split(' ')[0]}</span>
                     <a href="/api/logout"
@@ -321,6 +323,8 @@ const RegisterPage = {
 const StudentDashboard = {
     async init() {
         await AuthUI.injectNavbar();
+        const dateEl = document.getElementById('dashDate');
+        if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
         try {
             const res  = await fetch('/api/my-reservations');
             if (!res.ok) return;
@@ -359,6 +363,8 @@ const StudentDashboard = {
 const TechDashboard = {
     async init() {
         await AuthUI.injectNavbar();
+        const dateEl = document.getElementById('dashDate');
+        if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
         try {
             const res  = await fetch('/api/reservations');
             if (!res.ok) return;
@@ -1410,135 +1416,277 @@ const SearchPage = {
 const ProfilePage = {
     async init() {
         await AuthUI.injectNavbar();
- 
-        /* Hide the static success banner on load */
+
+        // Check if viewing someone else's profile via ?id=
+        const params   = new URLSearchParams(window.location.search);
+        const viewingId = params.get('id');
+
+        if (viewingId) {
+            await this.loadPublicProfile(viewingId);
+        } else {
+            await this.loadOwnProfile();
+        }
+    },
+
+    /* ── PUBLIC (read-only) view ── */
+    async loadPublicProfile(userId) {
+        try {
+            const res = await fetch(`/api/profile/${userId}`);
+            if (!res.ok) {
+                document.body.innerHTML += `<p style="padding:40px;color:#666;">Profile not found.</p>`;
+                return;
+            }
+            const profile = await res.json();
+            this.renderPublicProfile(profile);
+        } catch(e) {
+            console.log('Public profile error:', e);
+        }
+    },
+
+    renderPublicProfile(profile) {
+        const container = document.querySelector('.container');
+        if (!container) return;
+
+        // Hide success banner
+        const banner = document.querySelector('.success');
+        if (banner) banner.style.display = 'none';
+
+        container.innerHTML = `
+            <div class="header">
+                <h1>User Profile</h1>
+                <p>Public view</p>
+            </div>
+            <div class="grid">
+                <div class="left">
+                    <div class="card profile-card">
+                        <div class="avatar" style="background:${profile.avatarColor || '#006B3F'};">
+                            ${profile.name ? profile.name[0].toUpperCase() : '?'}
+                        </div>
+                        <h2>${profile.name || '—'}</h2>
+                        <p class="email">${profile.email || '—'}</p>
+                        <div class="role">${profile.role || 'student'}</div>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="card">
+                        <div class="card-header"><h3>About</h3></div>
+                        <div class="field">
+                            <label>Bio</label>
+                            <div class="value">${profile.bio || 'No bio provided.'}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    },
+
+    /* ── OWN profile (editable) ── */
+    async loadOwnProfile() {
         const successBanner = document.querySelector('.success');
         if (successBanner) successBanner.style.display = 'none';
- 
-        /* Load real user data */
+
         try {
-            const res  = await fetch('/api/me');
-            if (!res.ok) return;
-            const user = await res.json();
- 
-            /* Get full profile from a dedicated endpoint if available */
-            const profileRes  = await fetch('/api/profile');
-            if (!profileRes.ok) return;
-            const profile = await profileRes.json();
- 
-            /* Populate profile card */
-            const avatarEl = document.querySelector('.avatar');
-            if (avatarEl) {
-                avatarEl.textContent = profile.name ? profile.name[0].toUpperCase() : '?';
-                if (profile.avatarColor) avatarEl.style.background = profile.avatarColor;
-            }
- 
-            document.querySelectorAll('.profile-card h2').forEach(el => el.textContent = profile.name || '');
-            document.querySelectorAll('.profile-card .email').forEach(el => el.textContent = profile.email || '');
-            document.querySelectorAll('.profile-card .role').forEach(el => el.textContent = profile.role || '');
- 
-            /* Populate info fields */
-            const values = document.querySelectorAll('.value');
-            if (values[0]) values[0].textContent = profile.name  || '—';
-            if (values[1]) values[1].textContent = profile.email || '—';
-            if (values[2]) values[2].textContent = profile.role  || '—';
-            if (values[3]) values[3].textContent = profile.bio   || '—';
- 
-        } catch (err) {
+            const [meRes, profileRes, resRes] = await Promise.all([
+                fetch('/api/me'),
+                fetch('/api/profile'),
+                fetch('/api/my-reservations')
+            ]);
+
+            if (!meRes.ok || !profileRes.ok) return;
+
+            const profile      = await profileRes.json();
+            const reservations = resRes.ok ? await resRes.json() : [];
+
+            this.renderOwnProfile(profile, reservations);
+        } catch(err) {
             console.log('Profile load error:', err);
         }
- 
-        /* Edit button → inline form */
-        const editBtn = document.querySelector('.edit-btn');
-        if (editBtn) {
-            editBtn.addEventListener('click', () => this.showEditForm());
+    },
+
+    renderOwnProfile(profile, reservations) {
+        /* Avatar */
+        const avatarEl = document.querySelector('.avatar');
+        if (avatarEl) {
+            avatarEl.textContent = profile.name ? profile.name[0].toUpperCase() : '?';
+            avatarEl.style.background = profile.avatarColor || '#006B3F';
         }
- 
+
+        /* Avatar color picker */
+        const COLORS = ['#006B3F','#1d4ed8','#7c3aed','#db2777','#d97706','#0891b2'];
+        const colorContainer = document.querySelector('.avatar-colors');
+        if (colorContainer) {
+            colorContainer.innerHTML = '';
+            COLORS.forEach(color => {
+                const dot = document.createElement('div');
+                dot.style.cssText = `width:18px;height:18px;border-radius:50%;background:${color};
+                    cursor:pointer;border:2px solid ${profile.avatarColor === color ? '#111' : 'transparent'};
+                    transition:border-color 0.2s;`;
+                dot.title = color;
+                dot.addEventListener('click', async () => {
+                    // Update avatar color immediately
+                    if (avatarEl) avatarEl.style.background = color;
+                    colorContainer.querySelectorAll('div').forEach(d => d.style.borderColor = 'transparent');
+                    dot.style.borderColor = '#111';
+                    await fetch('/api/profile', {
+                        method:  'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body:    JSON.stringify({ avatarColor: color })
+                    });
+                });
+                colorContainer.appendChild(dot);
+            });
+        }
+
+        /* Name / email / role */
+        document.querySelectorAll('.profile-card h2').forEach(el => el.textContent = profile.name || '');
+        document.querySelectorAll('.profile-card .email').forEach(el => el.textContent = profile.email || '');
+        document.querySelectorAll('.profile-card .role').forEach(el => el.textContent = profile.role || '');
+
+        /* Info fields */
+        const values = document.querySelectorAll('.value');
+        if (values[0]) values[0].textContent = profile.name  || '—';
+        if (values[1]) values[1].textContent = profile.email || '—';
+        if (values[2]) values[2].textContent = profile.role  || '—';
+        if (values[3]) values[3].textContent = profile.bio   || '—';
+
+        /* Account stats */
+        const stats = document.querySelectorAll('.stat b');
+        const active = reservations.filter(r => r.status !== 'cancelled');
+        const confirmed = reservations.filter(r => r.status === 'confirmed');
+        if (stats[0]) stats[0].textContent = reservations.length;
+        if (stats[1]) stats[1].textContent = confirmed.length;
+        if (stats[2]) stats[2].textContent = active.length;
+
+        /* Current reservations list */
+        const resContainer = document.querySelector('.card .reservation')?.parentElement ||
+                             document.querySelectorAll('.card')[2];
+        if (resContainer) {
+            resContainer.querySelectorAll('.reservation').forEach(el => el.remove());
+            const header = resContainer.querySelector('.card-header');
+
+            // Update "View all" link
+            const viewAll = resContainer.querySelector('.card-header a');
+            if (viewAll) viewAll.href = '/my-reservations';
+
+            const activeRes = reservations.filter(r => r.status !== 'cancelled').slice(0, 3);
+            if (activeRes.length === 0) {
+                const empty = document.createElement('p');
+                empty.style.cssText = 'color:#999;font-size:14px;margin-top:10px;';
+                empty.textContent = 'No active reservations.';
+                resContainer.appendChild(empty);
+            } else {
+                activeRes.forEach(r => {
+                    const div = document.createElement('div');
+                    div.className = 'reservation';
+                    div.innerHTML = `
+                        <div class="seat">${r.seat}</div>
+                        <div class="res-info">
+                            <p>${r.lab} – Seat ${r.seat}</p>
+                            <span>${Utils.formatDate(r.date)} • ${Utils.formatSlots(r.slots)}</span>
+                        </div>
+                        <div class="status ${r.status}">${r.status}</div>`;
+                    resContainer.appendChild(div);
+                });
+            }
+        }
+
+        /* Edit button */
+        const editBtn = document.querySelector('.edit-btn');
+        if (editBtn) editBtn.addEventListener('click', () => this.showEditForm(profile));
+
         /* Delete account */
         const deleteBtn = document.querySelector('.delete-btn');
         if (deleteBtn) {
             deleteBtn.addEventListener('click', async () => {
-                if (!confirm('Are you absolutely sure? This action cannot be undone.')) return;
+                if (!confirm('This will permanently delete your account and cancel all reservations. Are you sure?')) return;
                 const res = await fetch('/api/profile', { method: 'DELETE' });
                 if (res.ok) {
                     Utils.toast('Account deleted.', 'success');
-                    setTimeout(() => window.location.href = '/', 1500);
+                    setTimeout(() => window.location.href = '/', 2000);
                 } else {
                     Utils.toast('Could not delete account.', 'error');
                 }
             });
         }
     },
- 
-    showEditForm() {
-        const card = document.querySelector('.card:nth-of-type(1) .right > .card, .right > .card:first-child');
-        const infoCard = Array.from(document.querySelectorAll('.card')).find(c => c.querySelector('.card-header h3')?.textContent === 'Profile Information');
+
+    showEditForm(profile) {
+        const infoCard = Array.from(document.querySelectorAll('.card'))
+            .find(c => c.querySelector('.card-header h3')?.textContent === 'Profile Information');
         if (!infoCard) return;
- 
-        const nameVal  = infoCard.querySelectorAll('.value')[0]?.textContent || '';
-        const bioVal   = infoCard.querySelectorAll('.value')[3]?.textContent || '';
- 
+
+        const nameVal = infoCard.querySelectorAll('.value')[0]?.textContent || '';
+        const bioVal  = infoCard.querySelectorAll('.value')[3]?.textContent || '';
+
         infoCard.innerHTML = `
             <h3 style="margin-bottom:15px;">Edit Profile</h3>
             <div class="form-group" style="margin-bottom:12px;">
                 <label style="font-size:13px;color:#777;">Full Name</label>
-                <input id="editName" value="${nameVal}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin-top:4px;">
+                <input id="editName" value="${nameVal !== '—' ? nameVal : ''}"
+                    style="width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin-top:4px;
+                           font-size:14px;font-family:Inter,sans-serif;">
             </div>
-            <div class="form-group" style="margin-bottom:12px;">
-                <label style="font-size:13px;color:#777;">Bio</label>
-                <textarea id="editBio" rows="3" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin-top:4px;resize:vertical;">${bioVal !== '—' ? bioVal : ''}</textarea>
+            <div class="form-group" style="margin-bottom:16px;">
+                <label style="font-size:13px;color:#777;">Bio / Description</label>
+                <textarea id="editBio" rows="4"
+                    style="width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin-top:4px;
+                           resize:vertical;font-size:14px;font-family:Inter,sans-serif;">${bioVal !== '—' ? bioVal : ''}</textarea>
+                <small style="color:#aaa;font-size:11px;">Max 500 characters</small>
             </div>
             <div style="display:flex;gap:10px;">
                 <button id="saveProfileBtn"
-                    style="background:#006B3F;color:white;border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-size:14px;">
+                    style="background:#006B3F;color:white;border:none;padding:10px 16px;
+                           border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;">
                     Save Changes
                 </button>
                 <button id="cancelEditBtn"
-                    style="border:1px solid #ddd;background:white;padding:10px 16px;border-radius:10px;cursor:pointer;font-size:14px;">
+                    style="border:1px solid #ddd;background:white;padding:10px 16px;
+                           border-radius:10px;cursor:pointer;font-size:14px;">
                     Cancel
                 </button>
             </div>`;
- 
+
         const nameInput = document.getElementById('editName');
         const bioInput  = document.getElementById('editBio');
- 
-        /* Live validation */
+
+        /* Character counter */
+        bioInput.addEventListener('input', () => {
+            const small = infoCard.querySelector('small');
+            const left  = 500 - bioInput.value.length;
+            if (small) {
+                small.textContent  = `${left} characters remaining`;
+                small.style.color  = left < 50 ? '#dc2626' : '#aaa';
+            }
+        });
+
         Utils.liveValidate(nameInput, [
             { test: v => v.trim() !== '',      msg: 'Name cannot be empty.' },
             { test: v => v.trim().length >= 2, msg: 'Name must be at least 2 characters.' }
         ]);
- 
+
         document.getElementById('saveProfileBtn').addEventListener('click', async () => {
             const name = nameInput.value.trim();
             const bio  = bioInput.value.trim();
- 
-            if (!name) {
-                Utils.setFieldError(nameInput, 'Name cannot be empty.');
-                return;
-            }
-            if (name.length < 2) {
-                Utils.setFieldError(nameInput, 'Name must be at least 2 characters.');
-                return;
-            }
- 
+
+            if (!name) { Utils.setFieldError(nameInput, 'Name cannot be empty.'); return; }
+            if (name.length < 2) { Utils.setFieldError(nameInput, 'Name must be at least 2 characters.'); return; }
+            if (bio.length > 500) { Utils.toast('Bio must not exceed 500 characters.', 'error'); return; }
+
             const res = await fetch('/api/profile', {
                 method:  'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ name, bio })
             });
- 
+
             if (res.ok) {
-                Utils.toast('Profile updated successfully!', 'success');
+                Utils.toast('Profile updated!', 'success');
                 setTimeout(() => window.location.reload(), 1000);
             } else {
-                const data = await res.json();
-                Utils.toast(data.message || 'Could not update profile.', 'error');
+                const d = await res.json();
+                Utils.toast(d.message || 'Could not update profile.', 'error');
             }
         });
- 
-        document.getElementById('cancelEditBtn').addEventListener('click', () => {
-            window.location.reload();
-        });
+
+        document.getElementById('cancelEditBtn').addEventListener('click', () => window.location.reload());
     }
 };
 
