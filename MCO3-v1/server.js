@@ -703,9 +703,9 @@ app.get('/api/lab-stats', async (req, res) => {
         const recs  = await Reservation.find({ date: today, status: { $ne: 'cancelled' } });
 
         const LABS = [
-            { key: 'gokongwei', total: 40 },
-            { key: 'andrew',    total: 30 },
-            { key: 'velasco',   total: 25 }
+            { key: 'gokongwei', total: 15 },
+            { key: 'andrew',    total: 15 },
+            { key: 'velasco',   total: 15 }
         ];
 
         const stats = LABS.map(lab => {

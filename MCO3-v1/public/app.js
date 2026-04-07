@@ -376,9 +376,9 @@ const StudentDashboard = {
                 const allData  = await allRes.json();
                 const today    = new Date().toISOString().split('T')[0];
                 const LABS     = [
-                    { key: 'gokongwei', total: 40 },
-                    { key: 'andrew',    total: 30 },
-                    { key: 'velasco',   total: 25 }
+                    { key: 'gokongwei', total: 15 },
+                    { key: 'andrew',    total: 15 },
+                    { key: 'velasco',   total: 15 }
                 ];
 
                 const labEls = document.querySelectorAll('.card .lab');
@@ -430,9 +430,9 @@ const TechDashboard = {
             /* Lab status bars */
             const today = new Date().toISOString().split('T')[0];
             const LABS  = [
-                { key: 'gokongwei', total: 40 },
-                { key: 'andrew',    total: 30 },
-                { key: 'velasco',   total: 25 }
+                { key: 'gokongwei', total: 15 },
+                { key: 'andrew',    total: 15 },
+                { key: 'velasco',   total: 15 }
             ];
 
             const labEls = document.querySelectorAll('.lab');
@@ -565,9 +565,9 @@ const ViewSlotsPage = {
                 if (panel) panel.innerHTML = `<h3>Select a seat</h3><p>Click any seat to see time slots.</p>`;
 
                 const LAB_NAMES = {
-                    gokongwei: { name: 'Gokongwei Lab', location: 'Gokongwei Hall • 40 seats' },
-                    andrew:    { name: 'Andrew Lab',    location: 'Andrew Building • 30 seats' },
-                    velasco:   { name: 'Velasco Lab',   location: 'Velasco Hall • 25 seats' }
+                    gokongwei: { name: 'Gokongwei Lab', location: 'Gokongwei Hall • 15 seats' },
+                    andrew:    { name: 'Andrew Lab',    location: 'Andrew Building • 15 seats' },
+                    velasco:   { name: 'Velasco Lab',   location: 'Velasco Hall • 15 seats' }
                 };
                 const info = LAB_NAMES[labSelect.value];
                 if (info) {
@@ -663,7 +663,7 @@ const ViewSlotsPage = {
             r.lab === this.selectedLab && r.date === today && r.status !== 'cancelled'
         );
 
-        const LAB_TOTALS = { gokongwei: 40, andrew: 30, velasco: 25 };
+        const LAB_TOTALS = { gokongwei: 15, andrew: 15, velasco: 15 };
         const total      = LAB_TOTALS[this.selectedLab] || 15;
 
         const bookedSeats  = new Set(recs.map(r => r.seat));
@@ -1434,7 +1434,7 @@ const SearchPage = {
                 });
 
                 // Seats 1–15 (adjust if your labs have different counts)
-                const seatCount = lab === 'gokongwei' ? 40 : lab === 'andrew' ? 30 : 25;
+                const seatCount = lab === 'gokongwei' ? 15 : lab === 'andrew' ? 15 : 15;
                 const freeSeats = [];
 
                 for (let seat = 1; seat <= seatCount; seat++) {
