@@ -563,6 +563,22 @@ const ViewSlotsPage = {
                 this.loadReservations();
                 const panel = document.querySelector('.seat-panel');
                 if (panel) panel.innerHTML = `<h3>Select a seat</h3><p>Click any seat to see time slots.</p>`;
+
+                const LAB_NAMES = {
+                    gokongwei: { name: 'Gokongwei Lab', location: 'Gokongwei Hall • 40 seats' },
+                    andrew:    { name: 'Andrew Lab',    location: 'Andrew Building • 30 seats' },
+                    velasco:   { name: 'Velasco Lab',   location: 'Velasco Hall • 25 seats' }
+                };
+                const info = LAB_NAMES[labSelect.value];
+                if (info) {
+                    const labInfoDiv = document.querySelector('.lab-info');
+                    if (labInfoDiv) {
+                        const h3 = labInfoDiv.querySelector('h3');
+                        const p  = labInfoDiv.querySelector('p');
+                        if (h3) h3.textContent = info.name;
+                        if (p)  p.textContent  = info.location;
+                    }
+                }
             });
         }
 
